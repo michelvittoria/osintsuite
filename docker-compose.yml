@@ -4,7 +4,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://:osintsuite-redis-pass@redis:6379
       - NODE_ENV=production
     depends_on:
       redis:
@@ -13,11 +13,11 @@ services:
 
   redis:
     image: redis:7-alpine
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass osintsuite-redis-pass
     volumes:
       - redis-data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "osintsuite-redis-pass", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5

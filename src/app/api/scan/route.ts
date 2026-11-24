@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateDomain, resolveAndGuard } from "@/lib/validate";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
-import { createJob, getCachedResult, processJob } from "@/lib/job-queue";
+import { createJob, getCachedResult, processJob, setJobResult } from "@/lib/job-queue";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -30,10 +30,12 @@ export async function POST(req: NextRequest) {
 
   const cached = await getCachedResult(domain);
   if (cached) {
+    // Create a job with cached result so frontend can poll normally
+    const jobId = await createJob(domain);
+    await setJobResult(jobId, cached);
     return NextResponse.json({
-      jobId: "cached",
+      jobId,
       status: "done",
-      result: cached,
       rateLimit: {
         remainingMinute: rateLimit.remainingMinute,
         remainingDay: rateLimit.remainingDay,

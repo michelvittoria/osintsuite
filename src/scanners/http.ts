@@ -1,4 +1,5 @@
 import type { HttpResult } from "@/lib/types";
+import { assertSafeUrl } from "@/lib/safe-net";
 
 const TIMEOUT = 10000;
 const MAX_REDIRECTS = 10;
@@ -13,6 +14,9 @@ export async function scanHttp(domain: string): Promise<HttpResult> {
 
   try {
     for (let i = 0; i < MAX_REDIRECTS; i++) {
+      // SSRF guard: validate every hop (initial + each redirect target).
+      await assertSafeUrl(currentUrl);
+
       const res = await fetch(currentUrl, {
         method: "GET",
         redirect: "manual",

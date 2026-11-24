@@ -1,29 +1,51 @@
-import { exec } from "child_process";
-import { promisify } from "util";
+import { spawn } from "child_process";
 import type { WhoisResult } from "@/lib/types";
 
-const execAsync = promisify(exec);
 const TIMEOUT = 10000;
 
+function runWhois(domain: string, args: string[]): Promise<string> {
+  return new Promise((resolve, reject) => {
+    // spawn with arg array — no shell, no command injection possible.
+    const proc = spawn("whois", args, { shell: false });
+    let stdout = "";
+    let stderr = "";
+    let settled = false;
+
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      proc.kill("SIGKILL");
+      reject(new Error("WHOIS timeout"));
+    }, TIMEOUT);
+
+    proc.stdout.on("data", (d) => (stdout += d.toString()));
+    proc.stderr.on("data", (d) => (stderr += d.toString()));
+
+    proc.on("error", (err) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      reject(err);
+    });
+
+    proc.on("close", (code) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (code === 0) resolve(stdout);
+      else reject(new Error(stderr.trim() || `whois exited with code ${code}`));
+    });
+  });
+}
+
 export async function scanWhois(domain: string): Promise<WhoisResult> {
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error("WHOIS timeout")), TIMEOUT)
-  );
-
   try {
-    const { stdout } = await Promise.race([
-      execAsync(`whois ${domain}`),
-      timeoutPromise,
-    ]);
-
+    const stdout = await runWhois(domain, [domain]);
     return parseWhois(stdout);
-  } catch (e) {
+  } catch {
     // Fallback: try with --no-verbose for cleaner output
     try {
-      const { stdout } = await Promise.race([
-        execAsync(`whois --no-verbose ${domain}`),
-        timeoutPromise,
-      ]);
+      const stdout = await runWhois(domain, ["--no-verbose", domain]);
       return parseWhois(stdout);
     } catch {
       throw new Error("WHOIS lookup failed");

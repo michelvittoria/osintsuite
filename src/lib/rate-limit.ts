@@ -49,10 +49,13 @@ export async function checkRateLimit(ip: string): Promise<RateLimitResult> {
 }
 
 export function getClientIp(req: Request): string {
-  const headers = req.headers;
-  const forwarded = headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
-  const real = headers.get("x-real-ip");
-  if (real) return real.trim();
+  // Cloudflare proxy header (highest priority)
+  const cf = req.headers.get("cf-connecting-ip");
+  if (cf) return cf.trim();
+  // Standard reverse-proxy headers
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0].trim();
+  const xr = req.headers.get("x-real-ip");
+  if (xr) return xr.trim();
   return "unknown";
 }

@@ -1,6 +1,6 @@
 import { getRedis, KEYS, TTL } from "@/lib/redis";
-import type { JobState, ScanResult } from "@/lib/types";
-import { runScan, ModuleName } from "@/scanners";
+import type { JobState, ScanResult, ModuleStatus } from "@/lib/types";
+import { runScan, ModuleName, MODULES } from "@/scanners";
 
 const JOB_TIMEOUT = 60000; // 60s max per job
 
@@ -35,12 +35,23 @@ export async function updateJob(jobId: string, updates: Partial<JobState>): Prom
   const existing = await getJob(jobId);
   if (!existing) return;
 
-  const updated = { ...existing, ...updates, updatedAt: Date.now() };
+  const updated: JobState = {
+    ...existing,
+    ...updates,
+    modules: { ...existing.modules, ...(updates.modules ?? {}) },
+    updatedAt: Date.now(),
+  };
   await redis.setex(KEYS.job(jobId), TTL.job, JSON.stringify(updated));
 }
 
 export async function setJobResult(jobId: string, result: ScanResult): Promise<void> {
-  await updateJob(jobId, { status: "done", result });
+  // Derive final module statuses from the result so the UI never shows a
+  // module stuck at "running" after the job completes.
+  const modules: Record<string, ModuleStatus> = {};
+  for (const name of MODULES) {
+    modules[name] = result.errors[name] ? "error" : "done";
+  }
+  await updateJob(jobId, { status: "done", result, modules });
 }
 
 export async function setJobError(jobId: string, error: string): Promise<void> {
@@ -72,7 +83,7 @@ export async function processJob(jobId: string): Promise<void> {
     const result = await Promise.race([
       runScan(job.domain, async (module, status) => {
         await updateJob(jobId, {
-          modules: { ...job.modules, [module]: status },
+          modules: { [module]: status },
         });
       }),
       timeoutPromise,
