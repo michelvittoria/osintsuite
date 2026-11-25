@@ -17,6 +17,9 @@ import {
   FileText,
   Terminal,
   MapPin,
+  GitBranch,
+  FileKey,
+  Bot,
 } from "lucide-react";
 import type { JobState, ScanResult } from "@/lib/types";
 
@@ -28,6 +31,9 @@ const MODULE_LABELS: Record<string, string> = {
   ports: "PORTS",
   subdomains: "SUBDOMAINS",
   ipGeo: "IP GEO",
+  ctLogs: "CT LOGS",
+  securityTxt: "SECURITY.TXT",
+  robotsTxt: "ROBOTS.TXT",
 };
 
 const MODULE_ICONS: Record<string, React.ReactNode> = {
@@ -38,6 +44,9 @@ const MODULE_ICONS: Record<string, React.ReactNode> = {
   ports: <Network className="h-3.5 w-3.5" />,
   subdomains: <Search className="h-3.5 w-3.5" />,
   ipGeo: <MapPin className="h-3.5 w-3.5" />,
+  ctLogs: <GitBranch className="h-3.5 w-3.5" />,
+  securityTxt: <FileKey className="h-3.5 w-3.5" />,
+  robotsTxt: <Bot className="h-3.5 w-3.5" />,
 };
 
 export default function ScanPage() {
@@ -237,7 +246,12 @@ function ResultView({
     { id: "ports", label: "PORTS", data: result.modules.ports },
     ...(result.targetType === "ip"
       ? [{ id: "ipGeo", label: "IP GEO", data: result.modules.ipGeo }]
-      : [{ id: "subdomains", label: "SUBDOMAINS", data: result.modules.subdomains }]),
+      : [
+          { id: "subdomains", label: "SUBDOMAINS", data: result.modules.subdomains },
+          { id: "ctLogs", label: "CT LOGS", data: result.modules.ctLogs },
+          { id: "securityTxt", label: "SECURITY.TXT", data: result.modules.securityTxt },
+          { id: "robotsTxt", label: "ROBOTS.TXT", data: result.modules.robotsTxt },
+        ]),
   ];
 
   return (
@@ -269,6 +283,9 @@ function ResultView({
         {activeTab === "http" && <HttpView data={result.modules.http} error={result.errors.http} />}
         {activeTab === "ports" && <PortsView data={result.modules.ports} error={result.errors.ports} />}
         {activeTab === "subdomains" && <SubdomainsView data={result.modules.subdomains} error={result.errors.subdomains} />}
+        {activeTab === "ctLogs" && <CtLogsView data={result.modules.ctLogs} error={result.errors.ctLogs} />}
+        {activeTab === "securityTxt" && <SecurityTxtView data={result.modules.securityTxt} error={result.errors.securityTxt} />}
+        {activeTab === "robotsTxt" && <RobotsTxtView data={result.modules.robotsTxt} error={result.errors.robotsTxt} />}
         {activeTab === "ipGeo" && <IpGeoView data={result.modules.ipGeo} error={result.errors.ipGeo} />}
       </div>
     </div>
@@ -521,6 +538,116 @@ function SubdomainsView({ data, error }: { data: any; error?: string }) {
         ))}
       </div>
     </Card>
+  );
+}
+
+function CtLogsView({ data, error }: { data: any; error?: string }) {
+  if (error) return <ErrorBox error={error} />;
+  if (!data) return null;
+
+  return (
+    <Card title={`CT Logs — ${data.subdomains.length} entries`}>
+      <div className="space-y-1.5 mono text-sm max-h-96 overflow-y-auto">
+        {data.subdomains.length === 0 && <span className="text-muted-foreground">NO ENTRIES FOUND</span>}
+        {data.subdomains.map((sub: string, i: number) => (
+          <div key={i} className="break-all">
+            {sub}
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function SecurityTxtView({ data, error }: { data: any; error?: string }) {
+  if (error) return <ErrorBox error={error} />;
+  if (!data) return null;
+
+  if (!data.exists) {
+    return <Card title="security.txt"><span className="text-muted-foreground text-sm">NOT FOUND</span></Card>;
+  }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <Card title="Parsed Fields">
+        <div className="space-y-2 text-sm">
+          <Row label="Contact" value={data.contact} mono />
+          <Row label="Expires" value={data.expires} />
+          <Row label="Policy" value={data.policy} mono />
+          <Row label="Encryption" value={data.encryption} mono />
+          <Row label="Acknowledgments" value={data.acknowledgments} mono />
+          <Row label="Canonical" value={data.canonical} mono />
+          {data.preferredLanguages && (
+            <Row label="Preferred Languages" value={data.preferredLanguages.join(", ")} />
+          )}
+        </div>
+      </Card>
+
+      <Card title="Raw Content">
+        <pre className="mono text-xs whitespace-pre-wrap break-all max-h-64 overflow-y-auto">
+          {data.raw}
+        </pre>
+      </Card>
+    </div>
+  );
+}
+
+function RobotsTxtView({ data, error }: { data: any; error?: string }) {
+  if (error) return <ErrorBox error={error} />;
+  if (!data) return null;
+
+  if (!data.exists) {
+    return <Card title="robots.txt"><span className="text-muted-foreground text-sm">NOT FOUND</span></Card>;
+  }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <Card title="Rules">
+        <div className="space-y-3 text-sm">
+          <div>
+            <h4 className="label mb-1.5 pb-1 border-b border-border">Disallow ({data.disallow.length})</h4>
+            <div className="space-y-1 mono text-xs">
+              {data.disallow.length === 0 && <span className="text-muted-foreground">NONE</span>}
+              {data.disallow.map((r: string, i: number) => (
+                <div key={i} className="break-all">{r}</div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h4 className="label mb-1.5 pb-1 border-b border-border">Allow ({data.allow.length})</h4>
+            <div className="space-y-1 mono text-xs">
+              {data.allow.length === 0 && <span className="text-muted-foreground">NONE</span>}
+              {data.allow.map((r: string, i: number) => (
+                <div key={i} className="break-all">{r}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <div className="space-y-4">
+        <Card title="Sitemaps">
+          <div className="space-y-1 mono text-xs">
+            {data.sitemaps.length === 0 && <span className="text-muted-foreground">NONE</span>}
+            {data.sitemaps.map((s: string, i: number) => (
+              <div key={i} className="break-all">{s}</div>
+            ))}
+          </div>
+        </Card>
+
+        <Card title="Crawl Delay">
+          <div className="text-sm">
+            {data.crawlDelay ? `${data.crawlDelay}s` : <span className="text-muted-foreground">NOT SET</span>}
+          </div>
+        </Card>
+
+        <Card title="Raw Content">
+          <pre className="mono text-xs whitespace-pre-wrap break-all max-h-64 overflow-y-auto">
+            {data.raw}
+          </pre>
+        </Card>
+      </div>
+    </div>
   );
 }
 

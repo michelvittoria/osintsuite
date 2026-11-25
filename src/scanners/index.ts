@@ -6,6 +6,9 @@ import { scanHttp } from "./http";
 import { scanPorts } from "./ports";
 import { scanSubdomains } from "./subdomains";
 import { scanIpGeo } from "./ip-geo";
+import { scanCtLogs } from "./ct-logs";
+import { scanSecurityTxt } from "./security-txt";
+import { scanRobotsTxt } from "./robots-txt";
 
 export type ModuleName =
   | "dns"
@@ -14,7 +17,10 @@ export type ModuleName =
   | "http"
   | "ports"
   | "subdomains"
-  | "ipGeo";
+  | "ipGeo"
+  | "ctLogs"
+  | "securityTxt"
+  | "robotsTxt";
 
 export const MODULES: ModuleName[] = [
   "dns",
@@ -23,6 +29,9 @@ export const MODULES: ModuleName[] = [
   "http",
   "ports",
   "subdomains",
+  "ctLogs",
+  "securityTxt",
+  "robotsTxt",
 ];
 
 export const IP_MODULES: ModuleName[] = [
@@ -73,6 +82,9 @@ export async function runScan(
           { name: "http", fn: () => scanHttp(target) },
           { name: "ports", fn: () => scanPorts(target) },
           { name: "subdomains", fn: () => scanSubdomains(target) },
+          { name: "ctLogs", fn: () => scanCtLogs(target) },
+          { name: "securityTxt", fn: () => scanSecurityTxt(target) },
+          { name: "robotsTxt", fn: () => scanRobotsTxt(target) },
         ];
 
   await Promise.all(

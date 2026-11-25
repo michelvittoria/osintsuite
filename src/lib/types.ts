@@ -72,6 +72,85 @@ export interface IpGeoResult {
   timezone?: string;
 }
 
+export interface CtLogsResult {
+  subdomains: string[];
+}
+
+export interface DnssecResult {
+  hasDnssec: boolean;
+  algorithm?: number;
+  keyTag?: number;
+  digestType?: number;
+  digest?: string;
+  validated: boolean;
+}
+
+export interface EmailSecurityResult {
+  spf: { record: string; valid: boolean; all: string } | null;
+  dmarc: { record: string; policy: string; pct: number } | null;
+  dkim: { selectors: string[]; records: Record<string, string> };
+}
+
+export interface TechFingerprintResult {
+  technologies: { name: string; confidence: number; version?: string; categories: string[] }[];
+}
+
+export interface SecurityTxtResult {
+  exists: boolean;
+  contact?: string;
+  expires?: string;
+  encryption?: string;
+  acknowledgments?: string;
+  policy?: string;
+  preferredLanguages?: string[];
+  canonical?: string;
+  raw: string;
+}
+
+export interface RobotsTxtResult {
+  exists: boolean;
+  disallow: string[];
+  allow: string[];
+  sitemaps: string[];
+  crawlDelay?: number;
+  raw: string;
+}
+
+export interface AsnLookupResult {
+  asns: { ip: string; asn: string; org: string; isp: string }[];
+}
+
+export interface ReverseIpResult {
+  ip: string;
+  domains: string[];
+}
+
+export interface TracerouteResult {
+  hops: { hop: number; ip: string; rtt: number; hostname?: string }[];
+}
+
+export interface CdnDetectionResult {
+  detected: boolean;
+  provider?: string;
+  evidence: string[];
+  cnames: string[];
+}
+
+export interface WaybackResult {
+  snapshots: { url: string; timestamp: string }[];
+  total: number;
+}
+
+export interface AxfrResult {
+  vulnerable: boolean;
+  nameservers: { ns: string; axfr: boolean; records?: DnsRecord[] }[];
+}
+
+export interface EmailHarvestResult {
+  emails: string[];
+  sources: { whois: string[]; txt: string[]; other: string[] };
+}
+
 export type TargetType = "domain" | "ip";
 
 export interface ScanResult {
@@ -87,6 +166,19 @@ export interface ScanResult {
     ports: PortResult[] | null;
     subdomains: SubdomainResult[] | null;
     ipGeo?: IpGeoResult | null;
+    ctLogs?: CtLogsResult | null;
+    securityTxt?: SecurityTxtResult | null;
+    robotsTxt?: RobotsTxtResult | null;
+    dnssec?: DnssecResult | null;
+    emailSecurity?: EmailSecurityResult | null;
+    asnLookup?: AsnLookupResult | null;
+    techFingerprint?: TechFingerprintResult | null;
+    cdnDetection?: CdnDetectionResult | null;
+    reverseIp?: ReverseIpResult | null;
+    traceroute?: TracerouteResult | null;
+    wayback?: WaybackResult | null;
+    axfr?: AxfrResult | null;
+    emailHarvest?: EmailHarvestResult | null;
   };
   errors: Record<string, string>;
 }
