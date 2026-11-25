@@ -1,10 +1,62 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Loader2, AlertCircle, CheckCircle, Terminal, ChevronRight, Globe, FileText, Shield, Radio, Plug, Search as SearchIcon, MapPin, GitBranch, FileKey, Bot, Key, Mail, Waypoints, Cpu, Share2, Route, Clock, Database, MailSearch, Server } from "lucide-react";
+import {
+  Search,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  Terminal,
+  ChevronRight,
+  Globe,
+  FileText,
+  Shield,
+  Radio,
+  Plug,
+  Search as SearchIcon,
+  MapPin,
+  GitBranch,
+  FileKey,
+  Bot,
+  Key,
+  Mail,
+  Waypoints,
+  Cpu,
+  Share2,
+  Route,
+  Clock,
+  Database,
+  MailSearch,
+  Server,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "@/i18n";
+
+const MODULES = [
+  { key: "dns", Icon: Globe, labelKey: "module.dns", descKey: "moduleDesc.dns" },
+  { key: "whois", Icon: FileText, labelKey: "module.whois", descKey: "moduleDesc.whois" },
+  { key: "ssl", Icon: Shield, labelKey: "module.ssl", descKey: "moduleDesc.ssl" },
+  { key: "http", Icon: Radio, labelKey: "module.http", descKey: "moduleDesc.http" },
+  { key: "ports", Icon: Plug, labelKey: "module.ports", descKey: "moduleDesc.ports" },
+  { key: "subdomains", Icon: SearchIcon, labelKey: "module.subdomains", descKey: "moduleDesc.subdomains" },
+  { key: "ipGeo", Icon: MapPin, labelKey: "module.ipGeo", descKey: "moduleDesc.ipGeo" },
+  { key: "ctLogs", Icon: GitBranch, labelKey: "module.ctLogs", descKey: "moduleDesc.ctLogs" },
+  { key: "securityTxt", Icon: FileKey, labelKey: "module.securityTxt", descKey: "moduleDesc.securityTxt" },
+  { key: "robotsTxt", Icon: Bot, labelKey: "module.robotsTxt", descKey: "moduleDesc.robotsTxt" },
+  { key: "dnssec", Icon: Key, labelKey: "module.dnssec", descKey: "moduleDesc.dnssec" },
+  { key: "emailSecurity", Icon: Mail, labelKey: "module.emailSecurity", descKey: "moduleDesc.emailSecurity" },
+  { key: "asnLookup", Icon: Waypoints, labelKey: "module.asnLookup", descKey: "moduleDesc.asnLookup" },
+  { key: "techFingerprint", Icon: Cpu, labelKey: "module.techFingerprint", descKey: "moduleDesc.techFingerprint" },
+  { key: "cdnDetection", Icon: Server, labelKey: "module.cdnDetection", descKey: "moduleDesc.cdnDetection" },
+  { key: "reverseIp", Icon: Share2, labelKey: "module.reverseIp", descKey: "moduleDesc.reverseIp" },
+  { key: "traceroute", Icon: Route, labelKey: "module.traceroute", descKey: "moduleDesc.traceroute" },
+  { key: "wayback", Icon: Clock, labelKey: "module.wayback", descKey: "moduleDesc.wayback" },
+  { key: "axfr", Icon: Database, labelKey: "module.axfr", descKey: "moduleDesc.axfr" },
+  { key: "emailHarvest", Icon: MailSearch, labelKey: "module.emailHarvest", descKey: "moduleDesc.emailHarvest" },
+] as const;
 
 export default function HomePage() {
+  const { t } = useTranslation();
   const [target, setTarget] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,7 +72,7 @@ export default function HomePage() {
 
     const trimmed = target.trim().toLowerCase();
     if (!isValid) {
-      setError("INVALID TARGET — ENTER A DOMAIN OR IPv4 ADDRESS");
+      setError(t("error.invalidTarget"));
       return;
     }
 
@@ -35,42 +87,48 @@ export default function HomePage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "SCAN INIT FAILED");
+        setError(data.error || t("error.scanInit"));
         return;
       }
 
       router.push(`/scan/${data.jobId}`);
     } catch {
-      setError("NETWORK ERROR");
+      setError(t("error.network"));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 py-20 relative">
+    <main className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative">
       <div className="absolute inset-0 opacity-5 pointer-events-none animate-sweep">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
       </div>
 
-      <div className="relative w-full max-w-xl">
+      <div className="relative w-full max-w-xl sm:max-w-2xl lg:max-w-3xl">
         {/* Header */}
-        <div className="mb-12">
-          <div className="flex items-center gap-3 mb-4">
-            <Terminal className="h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">OSINT SUITE</h1>
-              <p className="label">DOMAIN RECONNAISSANCE TERMINAL</p>
+        <div className="mb-8 sm:mb-12">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3">
+              <Terminal className="h-8 w-8 text-primary" />
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("header.title")}</h1>
+                <p className="label">{t("header.subtitle")}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline text-xs mono text-muted-foreground">{t("header.langLabel")}</span>
+              <LanguageToggle />
             </div>
           </div>
           <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
         </div>
 
         {/* Search Form */}
-        <form onSubmit={handleSubmit} className="panel p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="panel p-4 sm:p-6 space-y-4">
           <div className="relative">
             <label htmlFor="target" className="label block mb-2">
-              TARGET — DOMAIN OR IP
+              {t("home.targetLabel")}
             </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
@@ -79,8 +137,8 @@ export default function HomePage() {
                 type="text"
                 value={target}
                 onChange={(e) => setTarget(e.target.value)}
-                placeholder="example.com or 8.8.8.8"
-                className="w-full pl-10 pr-4 py-3 border border-input bg-background/50 rounded text-lg placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all disabled:opacity-50 mono"
+                placeholder={t("home.placeholder")}
+                className="w-full pl-10 pr-4 py-3 sm:py-4 border border-input bg-background/50 rounded text-base sm:text-lg placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all disabled:opacity-50 mono"
                 disabled={loading}
                 autoFocus
                 spellCheck={false}
@@ -88,9 +146,9 @@ export default function HomePage() {
             </div>
             {target.trim() && (
               <p className="mt-2 text-xs mono text-muted-foreground">
-                DETECTED:{" "}
+                {t("home.detected")}{" "}
                 <span className="text-primary">
-                  {isIp ? "IPv4 ADDRESS" : isDomain ? "DOMAIN" : "UNKNOWN"}
+                  {isIp ? t("home.typeIp") : isDomain ? t("home.typeDomain") : t("home.typeUnknown")}
                 </span>
               </p>
             )}
@@ -106,17 +164,17 @@ export default function HomePage() {
           <button
             type="submit"
             disabled={loading || !target.trim()}
-            className="w-full py-3.5 bg-primary text-primary-foreground rounded font-medium text-lg transition-all hover:shadow-[0_0_24px_hsl(var(--signal)/0.4)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:scale-100 flex items-center justify-center gap-2"
+            className="w-full py-3.5 sm:py-4 bg-primary text-primary-foreground rounded font-medium text-base sm:text-lg transition-all hover:shadow-[0_0_24px_hsl(var(--signal)/0.4)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:scale-100 flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                <span>INITIALIZING SCAN...</span>
+                <span>{t("home.initializing")}</span>
               </>
             ) : (
               <>
                 <CheckCircle className="h-5 w-5" />
-                <span>START SCAN</span>
+                <span>{t("home.startScan")}</span>
                 <ChevronRight className="h-5 w-5" />
               </>
             )}
@@ -124,43 +182,44 @@ export default function HomePage() {
         </form>
 
         {/* Modules list */}
-        <div className="mt-8 panel p-4">
-          <p className="label mb-3">MODULES</p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-            {[
-              { Icon: Globe, label: "DNS Records" },
-              { Icon: FileText, label: "WHOIS" },
-              { Icon: Shield, label: "SSL/TLS" },
-              { Icon: Radio, label: "HTTP Headers" },
-              { Icon: Plug, label: "Port Scan" },
-              { Icon: SearchIcon, label: "Subdomains" },
-              { Icon: MapPin, label: "IP Geo" },
-              { Icon: GitBranch, label: "CT Logs" },
-              { Icon: FileKey, label: "security.txt" },
-              { Icon: Bot, label: "robots.txt" },
-              { Icon: Key, label: "DNSSEC" },
-              { Icon: Mail, label: "Email Security" },
-              { Icon: Waypoints, label: "ASN Lookup" },
-              { Icon: Cpu, label: "Tech Fingerprint" },
-              { Icon: Server, label: "CDN Detection" },
-              { Icon: Share2, label: "Reverse IP" },
-              { Icon: Route, label: "Traceroute" },
-              { Icon: Clock, label: "Wayback" },
-              { Icon: Database, label: "AXFR" },
-              { Icon: MailSearch, label: "Email Harvest" },
-            ].map((m, i) => (
-              <div key={i} className="flex items-center gap-2 text-muted-foreground/80 hover:text-foreground transition-colors">
+        <div className="mt-6 sm:mt-8 panel p-4 sm:p-5">
+          <p className="label mb-3">{t("home.modules")}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 text-sm">
+            {MODULES.map((m, i) => (
+              <div
+                key={m.key}
+                className="group relative flex items-center gap-2 text-muted-foreground/80 hover:text-foreground transition-colors cursor-help"
+              >
                 <m.Icon className="h-4 w-4 text-primary flex-shrink-0" />
-                <span className="mono">{m.label}</span>
+                <span className="mono truncate">{t(m.labelKey)}</span>
+                <div className="absolute left-0 top-full mt-1 z-50 hidden md:block w-64 sm:w-72 p-3 text-xs mono text-muted-foreground bg-card border border-border rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-normal">
+                  {t(m.descKey)}
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground/60 mono">
-          RESULTS CACHED 24H • NO DATA STORED • STATIC ANALYSIS ONLY
+        <p className="mt-4 sm:mt-6 text-center text-xs text-muted-foreground/60 mono">
+          {t("home.footer")}
         </p>
       </div>
     </main>
+  );
+}
+
+function LanguageToggle() {
+  const { locale, setLocale } = useTranslation();
+
+  return (
+    <button
+      type="button"
+      onClick={() => setLocale(locale === "en" ? "pt" : "en")}
+      className="flex items-center gap-1.5 px-2 py-1 text-xs mono text-muted-foreground hover:text-primary border border-border rounded transition-colors"
+      aria-label={locale === "en" ? "Português" : "English"}
+      title={locale === "en" ? "Português" : "English"}
+    >
+      <span className="uppercase">{locale}</span>
+    </button>
   );
 }

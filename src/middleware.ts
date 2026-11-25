@@ -1,8 +1,23 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(_req: NextRequest) {
+export function middleware(req: NextRequest) {
   const res = NextResponse.next();
+
+  // Locale detection — cookie > host > default en
+  const cookieLocale = req.cookies.get("NEXT_LOCALE")?.value as "en" | "pt" | undefined;
+  const host = req.headers.get("host") ?? "";
+  let locale: "en" | "pt" = "en";
+
+  if (cookieLocale === "en" || cookieLocale === "pt") {
+    locale = cookieLocale;
+  } else if (host.includes(".br")) {
+    locale = "pt";
+  }
+
+  if (locale !== "en") {
+    res.cookies.set("NEXT_LOCALE", locale, { path: "/", maxAge: 31536000, sameSite: "lax" });
+  }
 
   // Security headers
   res.headers.set("X-Content-Type-Options", "nosniff");

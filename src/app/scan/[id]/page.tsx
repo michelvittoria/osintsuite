@@ -31,29 +31,7 @@ import {
   MailSearch,
 } from "lucide-react";
 import type { JobState, ScanResult } from "@/lib/types";
-
-const MODULE_LABELS: Record<string, string> = {
-  dns: "DNS",
-  whois: "WHOIS",
-  ssl: "SSL/TLS",
-  http: "HTTP",
-  ports: "PORTS",
-  subdomains: "SUBDOMAINS",
-  ipGeo: "IP GEO",
-  ctLogs: "CT LOGS",
-  securityTxt: "SECURITY.TXT",
-  robotsTxt: "ROBOTS.TXT",
-  dnssec: "DNSSEC",
-  emailSecurity: "EMAIL SEC",
-  asnLookup: "ASN LOOKUP",
-  techFingerprint: "TECH FINGERPRINT",
-  cdnDetection: "CDN DETECTION",
-  reverseIp: "REVERSE IP",
-  traceroute: "TRACEROUTE",
-  wayback: "WAYBACK",
-  axfr: "AXFR",
-  emailHarvest: "EMAIL HARVEST",
-};
+import { useTranslation } from "@/i18n";
 
 const MODULE_ICONS: Record<string, React.ReactNode> = {
   dns: <Globe className="h-3.5 w-3.5" />,
@@ -82,6 +60,7 @@ export default function ScanPage() {
   const params = useParams();
   const router = useRouter();
   const jobId = params.id as string;
+  const { t } = useTranslation();
 
   const [job, setJob] = useState<JobState | null>(null);
   const [error, setError] = useState("");
@@ -96,7 +75,7 @@ export default function ScanPage() {
         const res = await fetch(`/api/scan/${jobId}`);
         if (!res.ok) {
           if (res.status === 404) {
-            setError("SCAN NOT FOUND OR EXPIRED");
+            setError(t("error.notFound"));
             clearInterval(interval);
             return;
           }
@@ -110,7 +89,7 @@ export default function ScanPage() {
           clearInterval(interval);
         }
       } catch {
-        if (!cancelled) setError("CONNECTION ERROR");
+        if (!cancelled) setError(t("error.connection"));
       }
     };
 
@@ -121,20 +100,20 @@ export default function ScanPage() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [jobId]);
+  }, [jobId, t]);
 
   if (error) {
     return (
       <main className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center panel p-8 max-w-md">
+        <div className="text-center panel p-6 sm:p-8 max-w-md w-full">
           <XCircle className="h-12 w-12 text-primary mx-auto mb-4" />
-          <h1 className="text-xl font-bold mb-2">SCAN ERROR</h1>
+          <h1 className="text-xl font-bold mb-2">{t("scan.errorTitle")}</h1>
           <p className="text-muted-foreground mb-6 mono text-sm">{error}</p>
           <button
             onClick={() => router.push("/")}
             className="px-6 py-2.5 bg-primary text-primary-foreground rounded font-medium hover:shadow-[0_0_20px_hsl(var(--signal)/0.4)] transition-all"
           >
-            BACK TO SEARCH
+            {t("scan.backToSearch")}
           </button>
         </div>
       </main>
@@ -146,7 +125,7 @@ export default function ScanPage() {
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-3" />
-          <p className="label">CONNECTING...</p>
+          <p className="label">{t("scan.connecting")}</p>
         </div>
       </main>
     );
@@ -158,48 +137,48 @@ export default function ScanPage() {
   const totalCount = Object.keys(job.modules).length;
 
   return (
-    <main className="min-h-screen px-4 py-8 max-w-6xl mx-auto">
+    <main className="min-h-screen px-4 sm:px-6 py-6 sm:py-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <button
             onClick={() => router.push("/")}
-            className="p-2 border border-border hover:border-primary/50 hover:bg-secondary rounded transition-colors"
-            aria-label="Back"
+            className="p-2 border border-border hover:border-primary/50 hover:bg-secondary rounded transition-colors flex-shrink-0"
+            aria-label={t("scan.back")}
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <Terminal className="h-4 w-4 text-primary" />
-              <span className="label">TARGET</span>
+              <span className="label">{t("scan.target")}</span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">{job.domain}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight break-all">{job.domain}</h1>
             <p className="text-xs text-muted-foreground mono mt-1">
               {isDone
-                ? `SCAN COMPLETE — ${doneCount}/${totalCount} MODULES`
+                ? `${t("scan.complete")} — ${doneCount}/${totalCount} ${t("scan.modules")}`
                 : isError
-                ? "SCAN FAILED"
-                : `SCANNING — ${doneCount}/${totalCount} MODULES`}
+                ? t("error.scanFailed")
+                : `${t("scan.scanning")} — ${doneCount}/${totalCount} ${t("scan.modules")}`}
             </p>
           </div>
         </div>
 
         {isDone && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
             <a
               href={`/api/export/${jobId}?format=json`}
-              className="flex items-center gap-2 px-3 py-2 border border-border hover:border-primary/50 hover:bg-secondary rounded text-xs mono transition-colors"
+              className="flex items-center justify-center gap-2 px-3 py-2 border border-border hover:border-primary/50 hover:bg-secondary rounded text-xs mono transition-colors flex-1 sm:flex-none"
             >
               <Download className="h-3.5 w-3.5" />
-              JSON
+              {t("export.json")}
             </a>
             <a
               href={`/api/export/${jobId}?format=csv`}
-              className="flex items-center gap-2 px-3 py-2 border border-border hover:border-primary/50 hover:bg-secondary rounded text-xs mono transition-colors"
+              className="flex items-center justify-center gap-2 px-3 py-2 border border-border hover:border-primary/50 hover:bg-secondary rounded text-xs mono transition-colors flex-1 sm:flex-none"
             >
               <Download className="h-3.5 w-3.5" />
-              CSV
+              {t("export.csv")}
             </a>
           </div>
         )}
@@ -216,7 +195,7 @@ export default function ScanPage() {
       )}
 
       {/* Module status grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-8">
         {Object.entries(job.modules).map(([name, status]) => (
           <div
             key={name}
@@ -239,14 +218,14 @@ export default function ScanPage() {
             ) : (
               <Clock className="h-3.5 w-3.5 flex-shrink-0" />
             )}
-            <span className="truncate">{MODULE_LABELS[name] || name}</span>
+            <span className="truncate">{t(`label.${name}`)}</span>
           </div>
         ))}
       </div>
 
       {isError && (
         <div className="p-4 border border-destructive/30 bg-destructive/10 rounded text-destructive mb-6 mono text-sm">
-          {job.error || "SCAN FAILED"}
+          {job.error || t("error.scanFailed")}
         </div>
       )}
 
@@ -267,29 +246,30 @@ function ResultView({
   activeTab: string;
   setActiveTab: (t: string) => void;
 }) {
+  const { t } = useTranslation();
   const tabs = [
-    { id: "dns", label: "DNS", data: result.modules.dns },
-    { id: "whois", label: "WHOIS", data: result.modules.whois },
-    { id: "ssl", label: "SSL", data: result.modules.ssl },
-    { id: "http", label: "HTTP", data: result.modules.http },
-    { id: "ports", label: "PORTS", data: result.modules.ports },
+    { id: "dns", label: t("tab.dns"), data: result.modules.dns },
+    { id: "whois", label: t("tab.whois"), data: result.modules.whois },
+    { id: "ssl", label: t("tab.ssl"), data: result.modules.ssl },
+    { id: "http", label: t("tab.http"), data: result.modules.http },
+    { id: "ports", label: t("tab.ports"), data: result.modules.ports },
     ...(result.targetType === "ip"
-      ? [{ id: "ipGeo", label: "IP GEO", data: result.modules.ipGeo }]
+      ? [{ id: "ipGeo", label: t("tab.ipGeo"), data: result.modules.ipGeo }]
       : [
-          { id: "subdomains", label: "SUBDOMAINS", data: result.modules.subdomains },
-          { id: "ctLogs", label: "CT LOGS", data: result.modules.ctLogs },
-          { id: "securityTxt", label: "SECURITY.TXT", data: result.modules.securityTxt },
-          { id: "robotsTxt", label: "ROBOTS.TXT", data: result.modules.robotsTxt },
-          { id: "dnssec", label: "DNSSEC", data: result.modules.dnssec },
-          { id: "emailSecurity", label: "EMAIL SEC", data: result.modules.emailSecurity },
-          { id: "asnLookup", label: "ASN LOOKUP", data: result.modules.asnLookup },
-          { id: "techFingerprint", label: "TECH FINGERPRINT", data: result.modules.techFingerprint },
-          { id: "cdnDetection", label: "CDN DETECTION", data: result.modules.cdnDetection },
-          { id: "reverseIp", label: "REVERSE IP", data: result.modules.reverseIp },
-          { id: "traceroute", label: "TRACEROUTE", data: result.modules.traceroute },
-          { id: "wayback", label: "WAYBACK", data: result.modules.wayback },
-          { id: "axfr", label: "AXFR", data: result.modules.axfr },
-          { id: "emailHarvest", label: "EMAIL HARVEST", data: result.modules.emailHarvest },
+          { id: "subdomains", label: t("tab.subdomains"), data: result.modules.subdomains },
+          { id: "ctLogs", label: t("tab.ctLogs"), data: result.modules.ctLogs },
+          { id: "securityTxt", label: t("tab.securityTxt"), data: result.modules.securityTxt },
+          { id: "robotsTxt", label: t("tab.robotsTxt"), data: result.modules.robotsTxt },
+          { id: "dnssec", label: t("tab.dnssec"), data: result.modules.dnssec },
+          { id: "emailSecurity", label: t("tab.emailSecurity"), data: result.modules.emailSecurity },
+          { id: "asnLookup", label: t("tab.asnLookup"), data: result.modules.asnLookup },
+          { id: "techFingerprint", label: t("tab.techFingerprint"), data: result.modules.techFingerprint },
+          { id: "cdnDetection", label: t("tab.cdnDetection"), data: result.modules.cdnDetection },
+          { id: "reverseIp", label: t("tab.reverseIp"), data: result.modules.reverseIp },
+          { id: "traceroute", label: t("tab.traceroute"), data: result.modules.traceroute },
+          { id: "wayback", label: t("tab.wayback"), data: result.modules.wayback },
+          { id: "axfr", label: t("tab.axfr"), data: result.modules.axfr },
+          { id: "emailHarvest", label: t("tab.emailHarvest"), data: result.modules.emailHarvest },
         ]),
   ];
 
@@ -359,14 +339,15 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 }
 
 function DnsView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card title="A / AAAA / CNAME">
+      <Card title={t("view.aRecords")}>
         <div className="space-y-1.5 mono text-sm">
-          {data.records.length === 0 && <span className="text-muted-foreground">NO RECORDS</span>}
+          {data.records.length === 0 && <span className="text-muted-foreground">{t("view.noRecords")}</span>}
           {data.records.map((r: any, i: number) => (
             <div key={i} className="flex gap-3">
               <span className="text-primary w-14 flex-shrink-0">{r.type}</span>
@@ -376,18 +357,18 @@ function DnsView({ data, error }: { data: any; error?: string }) {
         </div>
       </Card>
 
-      <Card title="Nameservers">
+      <Card title={t("view.nameservers")}>
         <div className="space-y-1.5 mono text-sm">
-          {data.nameservers.length === 0 && <span className="text-muted-foreground">NONE</span>}
+          {data.nameservers.length === 0 && <span className="text-muted-foreground">{t("view.none")}</span>}
           {data.nameservers.map((ns: string, i: number) => (
             <div key={i} className="break-all">{ns}</div>
           ))}
         </div>
       </Card>
 
-      <Card title="MX Records">
+      <Card title={t("view.mxRecords")}>
         <div className="space-y-1.5 mono text-sm">
-          {data.mx.length === 0 && <span className="text-muted-foreground">NONE</span>}
+          {data.mx.length === 0 && <span className="text-muted-foreground">{t("view.none")}</span>}
           {data.mx.map((m: any, i: number) => (
             <div key={i} className="flex gap-3">
               <span className="text-primary w-8 flex-shrink-0">{m.priority}</span>
@@ -397,9 +378,9 @@ function DnsView({ data, error }: { data: any; error?: string }) {
         </div>
       </Card>
 
-      <Card title="TXT Records">
+      <Card title={t("view.txtRecords")}>
         <div className="space-y-1.5 mono text-xs">
-          {data.txt.length === 0 && <span className="text-muted-foreground">NONE</span>}
+          {data.txt.length === 0 && <span className="text-muted-foreground">{t("view.none")}</span>}
           {data.txt.map((t: string, i: number) => (
             <div key={i} className="break-all">{t}</div>
           ))}
@@ -407,11 +388,11 @@ function DnsView({ data, error }: { data: any; error?: string }) {
       </Card>
 
       {data.soa && (
-        <Card title="SOA">
+        <Card title={t("view.soa")}>
           <div className="space-y-1.5 mono text-sm">
-            <Row label="NS" value={data.soa.nsname} />
-            <Row label="Hostmaster" value={data.soa.hostmaster} />
-            <Row label="Serial" value={String(data.soa.serial)} />
+            <Row label={t("field.ns")} value={data.soa.nsname} />
+            <Row label={t("field.hostmaster")} value={data.soa.hostmaster} />
+            <Row label={t("field.serial")} value={String(data.soa.serial)} />
           </div>
         </Card>
       )}
@@ -420,33 +401,34 @@ function DnsView({ data, error }: { data: any; error?: string }) {
 }
 
 function WhoisView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card title="Registration">
+      <Card title={t("view.registration")}>
         <div className="space-y-2 text-sm">
-          <Row label="Registrar" value={data.registrar} />
-          <Row label="Registrant" value={data.registrant} />
-          <Row label="Created" value={data.createdDate} />
-          <Row label="Updated" value={data.updatedDate} />
-          <Row label="Expiry" value={data.expiryDate} />
+          <Row label={t("field.registrar")} value={data.registrar} />
+          <Row label={t("field.registrant")} value={data.registrant} />
+          <Row label={t("field.created")} value={data.createdDate} />
+          <Row label={t("field.updated")} value={data.updatedDate} />
+          <Row label={t("field.expiry")} value={data.expiryDate} />
         </div>
       </Card>
 
-      <Card title="Nameservers">
+      <Card title={t("view.nameservers")}>
         <div className="space-y-1.5 mono text-sm">
-          {data.nameservers.length === 0 && <span className="text-muted-foreground">NONE</span>}
+          {data.nameservers.length === 0 && <span className="text-muted-foreground">{t("view.none")}</span>}
           {data.nameservers.map((ns: string, i: number) => (
             <div key={i} className="break-all">{ns}</div>
           ))}
         </div>
       </Card>
 
-      <Card title="Status">
+      <Card title={t("view.status")}>
         <div className="space-y-1 text-sm">
-          {data.status.length === 0 && <span className="text-muted-foreground">NONE</span>}
+          {data.status.length === 0 && <span className="text-muted-foreground">{t("view.none")}</span>}
           {data.status.map((s: string, i: number) => (
             <div key={i} className="mono text-xs break-all">{s}</div>
           ))}
@@ -457,6 +439,7 @@ function WhoisView({ data, error }: { data: any; error?: string }) {
 }
 
 function SslView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
@@ -464,21 +447,21 @@ function SslView({ data, error }: { data: any; error?: string }) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card title="Certificate">
+      <Card title={t("view.certificate")}>
         <div className="space-y-2 text-sm">
-          <Row label="Subject" value={data.subject} />
-          <Row label="Issuer" value={data.issuer} />
-          <Row label="Protocol" value={data.protocol} />
-          <Row label="Serial" value={data.serialNumber} mono />
+          <Row label={t("field.subject")} value={data.subject} />
+          <Row label={t("field.issuer")} value={data.issuer} />
+          <Row label={t("field.protocol")} value={data.protocol} />
+          <Row label={t("field.serial")} value={data.serialNumber} mono />
         </div>
       </Card>
 
-      <Card title="Validity">
+      <Card title={t("view.validity")}>
         <div className="space-y-2 text-sm">
-          <Row label="Valid From" value={new Date(data.validFrom).toLocaleString()} />
-          <Row label="Valid To" value={new Date(data.validTo).toLocaleString()} />
+          <Row label={t("field.validFrom")} value={new Date(data.validFrom).toLocaleString()} />
+          <Row label={t("field.validTo")} value={new Date(data.validTo).toLocaleString()} />
           <div className="flex justify-between gap-4">
-            <span className="text-muted-foreground flex-shrink-0">Days Remaining</span>
+            <span className="text-muted-foreground flex-shrink-0">{t("field.daysRemaining")}</span>
             <span className={`mono font-semibold ${expiringSoon ? "text-destructive" : "text-primary"}`}>
               {data.daysRemaining}
             </span>
@@ -486,7 +469,7 @@ function SslView({ data, error }: { data: any; error?: string }) {
         </div>
       </Card>
 
-      <Card title={`SANs (${data.sans.length})`}>
+      <Card title={`${t("view.sans")} (${data.sans.length})`}>
         <div className="space-y-1 mono text-xs max-h-64 overflow-y-auto">
           {data.sans.map((san: string, i: number) => (
             <div key={i} className="break-all">{san}</div>
@@ -498,22 +481,23 @@ function SslView({ data, error }: { data: any; error?: string }) {
 }
 
 function HttpView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card title="Response">
+      <Card title={t("view.response")}>
         <div className="space-y-2 text-sm">
-          <Row label="Status" value={`${data.status} ${data.statusText}`} />
-          <Row label="Server" value={data.server} />
-          <Row label="Final URL" value={data.finalUrl} mono />
-          <Row label="Title" value={data.title} />
+          <Row label={t("view.status")} value={`${data.status} ${data.statusText}`} />
+          <Row label={t("field.server")} value={data.server} />
+          <Row label={t("field.finalUrl")} value={data.finalUrl} mono />
+          <Row label={t("field.title")} value={data.title} />
         </div>
       </Card>
 
       {data.redirects.length > 1 && (
-        <Card title="Redirect Chain">
+        <Card title={t("view.redirectChain")}>
           <div className="space-y-1 mono text-xs">
             {data.redirects.map((r: string, i: number) => (
               <div key={i} className="break-all">
@@ -524,7 +508,7 @@ function HttpView({ data, error }: { data: any; error?: string }) {
         </Card>
       )}
 
-      <Card title="Headers">
+      <Card title={t("view.headers")}>
         <div className="space-y-1 mono text-xs max-h-96 overflow-y-auto">
           {Object.entries(data.headers).map(([k, v]) => (
             <div key={k} className="break-all">
@@ -538,6 +522,7 @@ function HttpView({ data, error }: { data: any; error?: string }) {
 }
 
 function PortsView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
@@ -546,9 +531,9 @@ function PortsView({ data, error }: { data: any; error?: string }) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card title={`Open Ports (${open.length})`}>
+      <Card title={`${t("view.openPorts")} (${open.length})`}>
         <div className="space-y-1.5 mono text-sm">
-          {open.length === 0 && <span className="text-muted-foreground">NONE</span>}
+          {open.length === 0 && <span className="text-muted-foreground">{t("view.none")}</span>}
           {open.map((p: any) => (
             <div key={p.port} className="flex gap-3">
               <span className="text-primary w-12 flex-shrink-0">{p.port}</span>
@@ -558,7 +543,7 @@ function PortsView({ data, error }: { data: any; error?: string }) {
         </div>
       </Card>
 
-      <Card title={`Closed / Filtered (${closed.length})`}>
+      <Card title={`${t("view.closedPorts")} (${closed.length})`}>
         <div className="flex flex-wrap gap-1.5 mono text-xs">
           {closed.map((p: any) => (
             <span key={p.port} className="px-2 py-1 border border-border rounded text-muted-foreground">
@@ -572,13 +557,14 @@ function PortsView({ data, error }: { data: any; error?: string }) {
 }
 
 function SubdomainsView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   return (
-    <Card title={`Found ${data.length} subdomains`}>
+    <Card title={t("view.foundSubdomains", { n: data.length })}>
       <div className="space-y-1.5 mono text-sm">
-        {data.length === 0 && <span className="text-muted-foreground">NONE FOUND</span>}
+        {data.length === 0 && <span className="text-muted-foreground">{t("view.noneFound")}</span>}
         {data.map((s: any, i: number) => (
           <div key={i} className="flex gap-3 flex-wrap">
             <span className="break-all">{s.subdomain}</span>
@@ -591,13 +577,14 @@ function SubdomainsView({ data, error }: { data: any; error?: string }) {
 }
 
 function CtLogsView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   return (
-    <Card title={`CT Logs — ${data.subdomains.length} entries`}>
+    <Card title={t("view.ctEntries", { n: data.subdomains.length })}>
       <div className="space-y-1.5 mono text-sm max-h-96 overflow-y-auto">
-        {data.subdomains.length === 0 && <span className="text-muted-foreground">NO ENTRIES FOUND</span>}
+        {data.subdomains.length === 0 && <span className="text-muted-foreground">{t("view.noEntries")}</span>}
         {data.subdomains.map((sub: string, i: number) => (
           <div key={i} className="break-all">
             {sub}
@@ -609,30 +596,31 @@ function CtLogsView({ data, error }: { data: any; error?: string }) {
 }
 
 function SecurityTxtView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   if (!data.exists) {
-    return <Card title="security.txt"><span className="text-muted-foreground text-sm">NOT FOUND</span></Card>;
+    return <Card title={t("module.securityTxt")}><span className="text-muted-foreground text-sm">{t("view.notFound")}</span></Card>;
   }
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card title="Parsed Fields">
+      <Card title={t("view.parsedFields")}>
         <div className="space-y-2 text-sm">
-          <Row label="Contact" value={data.contact} mono />
-          <Row label="Expires" value={data.expires} />
-          <Row label="Policy" value={data.policy} mono />
-          <Row label="Encryption" value={data.encryption} mono />
-          <Row label="Acknowledgments" value={data.acknowledgments} mono />
-          <Row label="Canonical" value={data.canonical} mono />
+          <Row label={t("field.contact")} value={data.contact} mono />
+          <Row label={t("field.expires")} value={data.expires} />
+          <Row label={t("view.policy")} value={data.policy} mono />
+          <Row label={t("field.encryption")} value={data.encryption} mono />
+          <Row label={t("field.acknowledgments")} value={data.acknowledgments} mono />
+          <Row label={t("field.canonical")} value={data.canonical} mono />
           {data.preferredLanguages && (
-            <Row label="Preferred Languages" value={data.preferredLanguages.join(", ")} />
+            <Row label={t("field.preferredLanguages")} value={data.preferredLanguages.join(", ")} />
           )}
         </div>
       </Card>
 
-      <Card title="Raw Content">
+      <Card title={t("view.rawContent")}>
         <pre className="mono text-xs whitespace-pre-wrap break-all max-h-64 overflow-y-auto">
           {data.raw}
         </pre>
@@ -642,30 +630,31 @@ function SecurityTxtView({ data, error }: { data: any; error?: string }) {
 }
 
 function RobotsTxtView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   if (!data.exists) {
-    return <Card title="robots.txt"><span className="text-muted-foreground text-sm">NOT FOUND</span></Card>;
+    return <Card title={t("module.robotsTxt")}><span className="text-muted-foreground text-sm">{t("view.notFound")}</span></Card>;
   }
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card title="Rules">
+      <Card title={t("view.rules")}>
         <div className="space-y-3 text-sm">
           <div>
-            <h4 className="label mb-1.5 pb-1 border-b border-border">Disallow ({data.disallow.length})</h4>
+            <h4 className="label mb-1.5 pb-1 border-b border-border">{t("view.disallow")} ({data.disallow.length})</h4>
             <div className="space-y-1 mono text-xs">
-              {data.disallow.length === 0 && <span className="text-muted-foreground">NONE</span>}
+              {data.disallow.length === 0 && <span className="text-muted-foreground">{t("view.none")}</span>}
               {data.disallow.map((r: string, i: number) => (
                 <div key={i} className="break-all">{r}</div>
               ))}
             </div>
           </div>
           <div>
-            <h4 className="label mb-1.5 pb-1 border-b border-border">Allow ({data.allow.length})</h4>
+            <h4 className="label mb-1.5 pb-1 border-b border-border">{t("view.allow")} ({data.allow.length})</h4>
             <div className="space-y-1 mono text-xs">
-              {data.allow.length === 0 && <span className="text-muted-foreground">NONE</span>}
+              {data.allow.length === 0 && <span className="text-muted-foreground">{t("view.none")}</span>}
               {data.allow.map((r: string, i: number) => (
                 <div key={i} className="break-all">{r}</div>
               ))}
@@ -675,22 +664,22 @@ function RobotsTxtView({ data, error }: { data: any; error?: string }) {
       </Card>
 
       <div className="space-y-4">
-        <Card title="Sitemaps">
+        <Card title={t("view.sitemaps")}>
           <div className="space-y-1 mono text-xs">
-            {data.sitemaps.length === 0 && <span className="text-muted-foreground">NONE</span>}
+            {data.sitemaps.length === 0 && <span className="text-muted-foreground">{t("view.none")}</span>}
             {data.sitemaps.map((s: string, i: number) => (
               <div key={i} className="break-all">{s}</div>
             ))}
           </div>
         </Card>
 
-        <Card title="Crawl Delay">
+        <Card title={t("view.crawlDelay")}>
           <div className="text-sm">
-            {data.crawlDelay ? `${data.crawlDelay}s` : <span className="text-muted-foreground">NOT SET</span>}
+            {data.crawlDelay ? `${data.crawlDelay}s` : <span className="text-muted-foreground">{t("view.notSet")}</span>}
           </div>
         </Card>
 
-        <Card title="Raw Content">
+        <Card title={t("view.rawContent")}>
           <pre className="mono text-xs whitespace-pre-wrap break-all max-h-64 overflow-y-auto">
             {data.raw}
           </pre>
@@ -701,71 +690,73 @@ function RobotsTxtView({ data, error }: { data: any; error?: string }) {
 }
 
 function DnssecView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   if (!data.hasDnssec) {
-    return <Card title="DNSSEC"><span className="text-muted-foreground text-sm">NOT ENABLED</span></Card>;
+    return <Card title={t("module.dnssec")}><span className="text-muted-foreground text-sm">{t("view.notEnabled")}</span></Card>;
   }
 
   return (
-    <Card title="DNSSEC">
+    <Card title={t("module.dnssec")}>
       <div className="space-y-2 text-sm">
-        <Row label="Validated" value={data.validated ? "YES" : "NO"} mono />
-        <Row label="Algorithm" value={data.algorithm ? String(data.algorithm) : "N/A"} mono />
-        <Row label="Key Tag" value={data.keyTag ? String(data.keyTag) : "N/A"} mono />
-        <Row label="Digest Type" value={data.digestType ? String(data.digestType) : "N/A"} mono />
-        <Row label="Digest" value={data.digest || "N/A"} mono />
+        <Row label={t("view.validated")} value={data.validated ? t("view.yes") : t("view.no")} mono />
+        <Row label={t("view.algorithm")} value={data.algorithm ? String(data.algorithm) : "N/A"} mono />
+        <Row label={t("view.keyTag")} value={data.keyTag ? String(data.keyTag) : "N/A"} mono />
+        <Row label={t("view.digestType")} value={data.digestType ? String(data.digestType) : "N/A"} mono />
+        <Row label={t("view.digest")} value={data.digest || "N/A"} mono />
       </div>
     </Card>
   );
 }
 
 function EmailSecurityView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      <Card title="SPF">
+      <Card title={t("view.spf")}>
         <div className="space-y-2 text-sm">
           {data.spf ? (
             <>
-              <Row label="Valid" value={data.spf.valid ? "YES" : "NO"} mono />
-              <Row label="All Mechanism" value={data.spf.all} mono />
-              <Row label="Record" value={data.spf.record} mono />
+              <Row label={t("field.valid")} value={data.spf.valid ? t("view.yes") : t("view.no")} mono />
+              <Row label={t("view.allMechanism")} value={data.spf.all} mono />
+              <Row label={t("view.record")} value={data.spf.record} mono />
             </>
           ) : (
-            <span className="text-muted-foreground">NOT FOUND</span>
+            <span className="text-muted-foreground">{t("view.notFound")}</span>
           )}
         </div>
       </Card>
 
-      <Card title="DMARC">
+      <Card title={t("view.dmarc")}>
         <div className="space-y-2 text-sm">
           {data.dmarc ? (
             <>
-              <Row label="Policy" value={data.dmarc.policy} mono />
-              <Row label="PCT" value={`${data.dmarc.pct}%`} mono />
-              <Row label="Record" value={data.dmarc.record} mono />
+              <Row label={t("view.policy")} value={data.dmarc.policy} mono />
+              <Row label={t("field.pct")} value={`${data.dmarc.pct}%`} mono />
+              <Row label={t("view.record")} value={data.dmarc.record} mono />
             </>
           ) : (
-            <span className="text-muted-foreground">NOT FOUND</span>
+            <span className="text-muted-foreground">{t("view.notFound")}</span>
           )}
         </div>
       </Card>
 
-      <Card title="DKIM">
+      <Card title={t("view.dkim")}>
         <div className="space-y-2 text-sm">
           {data.dkim.selectors.length > 0 ? (
             <>
-              <Row label="Selectors" value={data.dkim.selectors.join(", ")} mono />
+              <Row label={t("view.selectors")} value={data.dkim.selectors.join(", ")} mono />
               {data.dkim.selectors.map((s: string) => (
                 <Row key={s} label={s} value={data.dkim.records[s]?.slice(0, 80)} mono />
               ))}
             </>
           ) : (
-            <span className="text-muted-foreground">NO SELECTORS FOUND</span>
+            <span className="text-muted-foreground">{t("view.noSelectors")}</span>
           )}
         </div>
       </Card>
@@ -774,22 +765,23 @@ function EmailSecurityView({ data, error }: { data: any; error?: string }) {
 }
 
 function AsnLookupView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   if (data.asns.length === 0) {
-    return <Card title="ASN Lookup"><span className="text-muted-foreground text-sm">NO ASN DATA</span></Card>;
+    return <Card title={t("module.asnLookup")}><span className="text-muted-foreground text-sm">{t("view.noAsn")}</span></Card>;
   }
 
   return (
-    <Card title={`ASN Lookup — ${data.asns.length} entries`}>
+    <Card title={t("view.asnEntries", { n: data.asns.length })}>
       <div className="space-y-3 text-sm">
         {data.asns.map((a: any, i: number) => (
           <div key={i} className="border-t border-border pt-3 first:border-0 first:pt-0">
-            <Row label="IP" value={a.ip} mono />
-            <Row label="ASN" value={a.asn} mono />
-            <Row label="Organization" value={a.org} />
-            <Row label="ISP" value={a.isp} />
+            <Row label={t("field.ip")} value={a.ip} mono />
+            <Row label={t("field.asn")} value={a.asn} mono />
+            <Row label={t("field.organization")} value={a.org} />
+            <Row label={t("field.isp")} value={a.isp} />
           </div>
         ))}
       </div>
@@ -798,27 +790,28 @@ function AsnLookupView({ data, error }: { data: any; error?: string }) {
 }
 
 function IpGeoView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card title="Location">
+      <Card title={t("view.location")}>
         <div className="space-y-2 text-sm">
-          <Row label="IP" value={data.query} mono />
-          <Row label="Country" value={data.country} />
-          <Row label="Country Code" value={data.countryCode} mono />
-          <Row label="Region" value={data.regionName} />
-          <Row label="City" value={data.city} />
-          <Row label="Timezone" value={data.timezone} mono />
+          <Row label={t("field.ip")} value={data.query} mono />
+          <Row label={t("field.country")} value={data.country} />
+          <Row label={t("field.countryCode")} value={data.countryCode} mono />
+          <Row label={t("field.region")} value={data.regionName} />
+          <Row label={t("field.city")} value={data.city} />
+          <Row label={t("field.timezone")} value={data.timezone} mono />
         </div>
       </Card>
 
-      <Card title="Network">
+      <Card title={t("view.network")}>
         <div className="space-y-2 text-sm">
-          <Row label="ISP" value={data.isp} />
-          <Row label="Organization" value={data.org} />
-          <Row label="ASN" value={data.asn} mono />
+          <Row label={t("field.isp")} value={data.isp} />
+          <Row label={t("field.organization")} value={data.org} />
+          <Row label={t("field.asn")} value={data.asn} mono />
         </div>
       </Card>
     </div>
@@ -826,22 +819,23 @@ function IpGeoView({ data, error }: { data: any; error?: string }) {
 }
 
 function TechFingerprintView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   if (data.technologies.length === 0) {
-    return <Card title="Tech Fingerprint"><span className="text-muted-foreground text-sm">NO TECHNOLOGIES DETECTED</span></Card>;
+    return <Card title={t("module.techFingerprint")}><span className="text-muted-foreground text-sm">{t("view.noTech")}</span></Card>;
   }
 
   return (
-    <Card title={`Tech Fingerprint — ${data.technologies.length} detected`}>
+    <Card title={t("view.techDetected", { n: data.technologies.length })}>
       <div className="space-y-3 text-sm">
         {data.technologies.map((t: any, i: number) => (
           <div key={i} className="border-t border-border pt-3 first:border-0 first:pt-0">
-            <Row label="Name" value={t.name} />
-            <Row label="Confidence" value={`${t.confidence}%`} mono />
-            {t.version && <Row label="Version" value={t.version} mono />}
-            <Row label="Categories" value={t.categories.join(", ")} />
+            <Row label={t("field.name")} value={t.name} />
+            <Row label={t("field.confidence")} value={`${t.confidence}%`} mono />
+            {t.version && <Row label={t("field.version")} value={t.version} mono />}
+            <Row label={t("field.categories")} value={t.categories.join(", ")} />
           </div>
         ))}
       </div>
@@ -850,18 +844,19 @@ function TechFingerprintView({ data, error }: { data: any; error?: string }) {
 }
 
 function CdnDetectionView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   return (
-    <Card title="CDN Detection">
+    <Card title={t("module.cdnDetection")}>
       <div className="space-y-3 text-sm">
-        <Row label="Detected" value={data.detected ? "YES" : "NO"} mono />
-        {data.provider && <Row label="Provider" value={data.provider} />}
-        {data.cname && <Row label="CNAME" value={data.cname} mono />}
-        <Row label="Evidence" value={data.evidence.length > 0 ? data.evidence.join(", ") : "NONE"} />
+        <Row label={t("view.detected")} value={data.detected ? t("view.yes") : t("view.no")} mono />
+        {data.provider && <Row label={t("view.provider")} value={data.provider} />}
+        {data.cname && <Row label={t("field.cname")} value={data.cname} mono />}
+        <Row label={t("view.evidence")} value={data.evidence.length > 0 ? data.evidence.join(", ") : t("view.none")} />
         <div className="pt-2">
-          <span className="text-muted-foreground">Headers:</span>
+          <span className="text-muted-foreground">{t("view.headers")}:</span>
           <div className="space-y-1 mt-1 text-xs mono">
             {Object.entries(data.headers).map(([k, v]) => (
               <div key={k} className="text-muted-foreground/70">{k}: {String(v)}</div>
@@ -874,14 +869,15 @@ function CdnDetectionView({ data, error }: { data: any; error?: string }) {
 }
 
 function ReverseIpView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   return (
-    <Card title={`Reverse IP — ${data.domains.length} domains on ${data.ip}`}>
+    <Card title={t("view.reverseIpTitle", { n: data.domains.length, ip: data.ip })}>
       <div className="space-y-2 text-sm max-h-96 overflow-y-auto">
         {data.domains.length === 0 ? (
-          <span className="text-muted-foreground">NO DOMAINS FOUND</span>
+          <span className="text-muted-foreground">{t("view.noDomains")}</span>
         ) : (
           data.domains.map((d: string, i: number) => (
             <Row key={i} label={d} value="" mono />
@@ -893,15 +889,16 @@ function ReverseIpView({ data, error }: { data: any; error?: string }) {
 }
 
 function TracerouteView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   if (data.hops.length === 0) {
-    return <Card title="Traceroute"><span className="text-muted-foreground text-sm">NO HOPS</span></Card>;
+    return <Card title={t("module.traceroute")}><span className="text-muted-foreground text-sm">{t("view.noHops")}</span></Card>;
   }
 
   return (
-    <Card title={`Traceroute — ${data.hops.length} hops`}>
+    <Card title={t("view.tracerouteTitle", { n: data.hops.length })}>
       <div className="space-y-2 text-sm font-mono">
         {data.hops.map((h: any) => (
           <div key={h.hop} className="flex gap-4">
@@ -917,14 +914,15 @@ function TracerouteView({ data, error }: { data: any; error?: string }) {
 }
 
 function WaybackView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   return (
-    <Card title={`Wayback — ${data.total} snapshots`}>
+    <Card title={t("view.waybackTitle", { n: data.total })}>
       <div className="space-y-2 text-sm max-h-96 overflow-y-auto">
         {data.snapshots.length === 0 ? (
-          <span className="text-muted-foreground">NO SNAPSHOTS</span>
+          <span className="text-muted-foreground">{t("view.noSnapshots")}</span>
         ) : (
           data.snapshots.slice(0, 50).map((s: any, i: number) => (
             <div key={i} className="flex gap-2">
@@ -936,7 +934,7 @@ function WaybackView({ data, error }: { data: any; error?: string }) {
           ))
         )}
         {data.snapshots.length > 50 && (
-          <p className="text-xs text-muted-foreground mt-2">Showing first 50 of {data.snapshots.length}</p>
+          <p className="text-xs text-muted-foreground mt-2">{t("scan.showingFirst", { n: 50, total: data.snapshots.length })}</p>
         )}
       </div>
     </Card>
@@ -944,23 +942,24 @@ function WaybackView({ data, error }: { data: any; error?: string }) {
 }
 
 function AxfrView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   return (
-    <Card title="AXFR Zone Transfer">
+    <Card title={t("view.axfrTitle")}>
       <div className="space-y-3 text-sm">
-        <Row label="Vulnerable" value={data.vulnerable ? "YES" : "NO"} mono />
+        <Row label={t("view.vulnerable")} value={data.vulnerable ? t("view.yes") : t("view.no")} mono />
         {data.nameservers.map((ns: any, i: number) => (
           <div key={i} className="border-t border-border pt-3 first:border-0 first:pt-0">
-            <Row label="Nameserver" value={ns.ns} mono />
-            <Row label="AXFR Allowed" value={ns.axfr ? "YES" : "NO"} mono />
+            <Row label={t("field.nameserver")} value={ns.ns} mono />
+            <Row label={t("view.axfrAllowed")} value={ns.axfr ? t("view.yes") : t("view.no")} mono />
             {ns.axfr && ns.records && ns.records.length > 0 && (
               <div className="mt-2 space-y-1 text-xs mono">
                 {ns.records.slice(0, 20).map((r: any, j: number) => (
                   <div key={j} className="text-muted-foreground/70 pl-4">{r.type} {r.value}</div>
                 ))}
-                {ns.records.length > 20 && <div className="text-muted-foreground/50 pl-4">... and {ns.records.length - 20} more</div>}
+                {ns.records.length > 20 && <div className="text-muted-foreground/50 pl-4">{t("view.andMore", { n: ns.records.length - 20 })}</div>}
               </div>
             )}
           </div>
@@ -971,25 +970,26 @@ function AxfrView({ data, error }: { data: any; error?: string }) {
 }
 
 function EmailHarvestView({ data, error }: { data: any; error?: string }) {
+  const { t } = useTranslation();
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
 
   const allEmails = [...new Set(data.emails as string[])];
 
   return (
-    <Card title={`Email Harvest — ${allEmails.length} unique emails`}>
+    <Card title={t("view.emailHarvestTitle", { n: allEmails.length })}>
       <div className="space-y-3 text-sm">
         <div>
-          <span className="text-muted-foreground">Sources:</span>
+          <span className="text-muted-foreground">{t("view.sources")}:</span>
           <div className="flex gap-4 mt-1 text-xs">
             <span>WHOIS: {data.sources.whois.length}</span>
             <span>TXT: {data.sources.txt.length}</span>
-            <span>Other: {data.sources.other.length}</span>
+            <span>{t("view.other")}: {data.sources.other.length}</span>
           </div>
         </div>
         <div className="max-h-96 overflow-y-auto space-y-1">
           {allEmails.length === 0 ? (
-            <span className="text-muted-foreground">NO EMAILS FOUND</span>
+            <span className="text-muted-foreground">{t("view.noEmails")}</span>
           ) : (
             allEmails.map((e: string, i: number) => (
               <Row key={i} label={e} value="" mono />

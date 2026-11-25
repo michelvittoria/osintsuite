@@ -3,9 +3,10 @@ import { getJob } from "@/lib/job-queue";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const jobId = params.id;
+  const { id } = await params;
+  const jobId = id;
   const format = req.nextUrl.searchParams.get("format") || "json";
   const job = await getJob(jobId);
 
