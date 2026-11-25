@@ -26,7 +26,7 @@ describe("validateDomain", () => {
   it("rejects blocked TLDs", () => {
     expect(validateDomain("foo.local").valid).toBe(false);
     expect(validateDomain("foo.internal").valid).toBe(false);
-    expect(validateDomain("foo.test").valid).toBe(false);
+    expect(validateDomain("foo.invalid").valid).toBe(false);
   });
 
   it("rejects overly long domains", () => {

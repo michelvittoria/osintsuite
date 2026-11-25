@@ -2,7 +2,7 @@ import { isIP } from "net";
 
 const DOMAIN_REGEX = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i;
 
-const BLOCKED_TLDS = ["local", "localhost", "internal", "test", "example", "invalid"];
+const BLOCKED_TLDS = ["local", "localhost", "internal", "invalid"];
 
 const PRIVATE_IP_RANGES = [
   /^10\./,

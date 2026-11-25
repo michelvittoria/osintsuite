@@ -1,5 +1,4 @@
 import { spawn } from "child_process";
-import { promisify } from "util";
 
 export interface TracerouteHop {
   hop: number;
@@ -13,11 +12,7 @@ export interface TracerouteResult {
   target: string;
 }
 
-interface ParseState {
-  hops: TracerouteHop[];
-  currentHop: number | null;
-  hostnames: string[];
-}
+const TIMEOUT_MS = 30000;
 
 function parseTraceroute(output: string): TracerouteHop[] {
   const lines = output.split("\n");
@@ -59,39 +54,51 @@ function parseTraceroute(output: string): TracerouteHop[] {
   return hops;
 }
 
-export async function scanTraceroute(target: string): Promise<TracerouteResult> {
+function runCommand(cmd: string, args: string[]): Promise<{ stdout: string; missing: boolean }> {
   return new Promise((resolve) => {
+    let stdout = "";
+    let settled = false;
+
+    const finish = (missing: boolean) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve({ stdout, missing });
+    };
+
+    let proc: ReturnType<typeof spawn>;
     try {
-      const proc = spawn("traceroute", ["-n", "-w", "2", "-q", "1", target]);
-
-      let stdout = "";
-      let stderr = "";
-
-      proc.stdout.on("data", (chunk: Buffer) => {
-        stdout += chunk.toString();
-      });
-
-      proc.stderr.on("data", (chunk: Buffer) => {
-        stderr += chunk.toString();
-      });
-
-      const timer = setTimeout(() => {
-        proc.kill("SIGTERM");
-        resolve({ hops: [], target });
-      }, 30000);
-
-      proc.on("close", (code) => {
-        clearTimeout(timer);
-        const hops = parseTraceroute(stdout);
-        resolve({ hops, target });
-      });
-
-      proc.on("error", () => {
-        clearTimeout(timer);
-        resolve({ hops: [], target });
-      });
+      proc = spawn(cmd, args);
     } catch {
-      resolve({ hops: [], target });
+      resolve({ stdout: "", missing: true });
+      return;
     }
+
+    const timer = setTimeout(() => {
+      proc.kill("SIGTERM");
+      finish(false);
+    }, TIMEOUT_MS);
+
+    proc.stdout?.on("data", (chunk: Buffer) => {
+      stdout += chunk.toString();
+    });
+    // Drain stderr so the process never blocks on a full pipe.
+    proc.stderr?.on("data", () => {});
+
+    proc.on("close", () => finish(false));
+    proc.on("error", (err: NodeJS.ErrnoException) => {
+      finish(err.code === "ENOENT");
+    });
   });
+}
+
+export async function scanTraceroute(target: string): Promise<TracerouteResult> {
+  // Prefer traceroute; fall back to tracepath when the binary is absent.
+  const primary = await runCommand("traceroute", ["-n", "-w", "2", "-q", "1", target]);
+  if (!primary.missing) {
+    return { hops: parseTraceroute(primary.stdout), target };
+  }
+
+  const fallback = await runCommand("tracepath", ["-n", target]);
+  return { hops: parseTraceroute(fallback.stdout), target };
 }

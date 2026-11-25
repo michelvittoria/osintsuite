@@ -11,7 +11,7 @@ export interface WaybackResult {
 }
 
 export async function scanWayback(target: string): Promise<WaybackResult> {
-  const url = `http://webcache.cdn.archive.org/cdx/search/cdx?url=*.${encodeURIComponent(target)}/*&output=json&fl=original,timestamp&collapse=urlkey&limit=100`;
+  const url = `http://web.archive.org/cdx/search/cdx?url=*.${encodeURIComponent(target)}/*&output=json&fl=original,timestamp&collapse=urlkey&limit=100`;
   await assertSafeUrl(url);
 
   const controller = new AbortController();

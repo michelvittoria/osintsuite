@@ -1,7 +1,7 @@
 import type { CtLogsResult } from "@/lib/types";
 import { assertSafeUrl } from "@/lib/safe-net";
 
-const TIMEOUT = 10000;
+const TIMEOUT = 30000;
 
 export async function scanCtLogs(domain: string): Promise<CtLogsResult> {
   const controller = new AbortController();
