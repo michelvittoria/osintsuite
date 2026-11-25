@@ -20,6 +20,15 @@ import {
   GitBranch,
   FileKey,
   Bot,
+  Key,
+  Mail,
+  Waypoints,
+  Cpu,
+  Share2,
+  Route,
+  Clock as ClockIcon,
+  Database,
+  MailSearch,
 } from "lucide-react";
 import type { JobState, ScanResult } from "@/lib/types";
 
@@ -34,6 +43,16 @@ const MODULE_LABELS: Record<string, string> = {
   ctLogs: "CT LOGS",
   securityTxt: "SECURITY.TXT",
   robotsTxt: "ROBOTS.TXT",
+  dnssec: "DNSSEC",
+  emailSecurity: "EMAIL SEC",
+  asnLookup: "ASN LOOKUP",
+  techFingerprint: "TECH FINGERPRINT",
+  cdnDetection: "CDN DETECTION",
+  reverseIp: "REVERSE IP",
+  traceroute: "TRACEROUTE",
+  wayback: "WAYBACK",
+  axfr: "AXFR",
+  emailHarvest: "EMAIL HARVEST",
 };
 
 const MODULE_ICONS: Record<string, React.ReactNode> = {
@@ -47,6 +66,16 @@ const MODULE_ICONS: Record<string, React.ReactNode> = {
   ctLogs: <GitBranch className="h-3.5 w-3.5" />,
   securityTxt: <FileKey className="h-3.5 w-3.5" />,
   robotsTxt: <Bot className="h-3.5 w-3.5" />,
+  dnssec: <Key className="h-3.5 w-3.5" />,
+  emailSecurity: <Mail className="h-3.5 w-3.5" />,
+  asnLookup: <Waypoints className="h-3.5 w-3.5" />,
+  techFingerprint: <Cpu className="h-3.5 w-3.5" />,
+  cdnDetection: <Server className="h-3.5 w-3.5" />,
+  reverseIp: <Share2 className="h-3.5 w-3.5" />,
+  traceroute: <Route className="h-3.5 w-3.5" />,
+  wayback: <ClockIcon className="h-3.5 w-3.5" />,
+  axfr: <Database className="h-3.5 w-3.5" />,
+  emailHarvest: <MailSearch className="h-3.5 w-3.5" />,
 };
 
 export default function ScanPage() {
@@ -251,6 +280,16 @@ function ResultView({
           { id: "ctLogs", label: "CT LOGS", data: result.modules.ctLogs },
           { id: "securityTxt", label: "SECURITY.TXT", data: result.modules.securityTxt },
           { id: "robotsTxt", label: "ROBOTS.TXT", data: result.modules.robotsTxt },
+          { id: "dnssec", label: "DNSSEC", data: result.modules.dnssec },
+          { id: "emailSecurity", label: "EMAIL SEC", data: result.modules.emailSecurity },
+          { id: "asnLookup", label: "ASN LOOKUP", data: result.modules.asnLookup },
+          { id: "techFingerprint", label: "TECH FINGERPRINT", data: result.modules.techFingerprint },
+          { id: "cdnDetection", label: "CDN DETECTION", data: result.modules.cdnDetection },
+          { id: "reverseIp", label: "REVERSE IP", data: result.modules.reverseIp },
+          { id: "traceroute", label: "TRACEROUTE", data: result.modules.traceroute },
+          { id: "wayback", label: "WAYBACK", data: result.modules.wayback },
+          { id: "axfr", label: "AXFR", data: result.modules.axfr },
+          { id: "emailHarvest", label: "EMAIL HARVEST", data: result.modules.emailHarvest },
         ]),
   ];
 
@@ -286,6 +325,16 @@ function ResultView({
         {activeTab === "ctLogs" && <CtLogsView data={result.modules.ctLogs} error={result.errors.ctLogs} />}
         {activeTab === "securityTxt" && <SecurityTxtView data={result.modules.securityTxt} error={result.errors.securityTxt} />}
         {activeTab === "robotsTxt" && <RobotsTxtView data={result.modules.robotsTxt} error={result.errors.robotsTxt} />}
+        {activeTab === "dnssec" && <DnssecView data={result.modules.dnssec} error={result.errors.dnssec} />}
+        {activeTab === "emailSecurity" && <EmailSecurityView data={result.modules.emailSecurity} error={result.errors.emailSecurity} />}
+        {activeTab === "asnLookup" && <AsnLookupView data={result.modules.asnLookup} error={result.errors.asnLookup} />}
+        {activeTab === "techFingerprint" && <TechFingerprintView data={result.modules.techFingerprint} error={result.errors.techFingerprint} />}
+        {activeTab === "cdnDetection" && <CdnDetectionView data={result.modules.cdnDetection} error={result.errors.cdnDetection} />}
+        {activeTab === "reverseIp" && <ReverseIpView data={result.modules.reverseIp} error={result.errors.reverseIp} />}
+        {activeTab === "traceroute" && <TracerouteView data={result.modules.traceroute} error={result.errors.traceroute} />}
+        {activeTab === "wayback" && <WaybackView data={result.modules.wayback} error={result.errors.wayback} />}
+        {activeTab === "axfr" && <AxfrView data={result.modules.axfr} error={result.errors.axfr} />}
+        {activeTab === "emailHarvest" && <EmailHarvestView data={result.modules.emailHarvest} error={result.errors.emailHarvest} />}
         {activeTab === "ipGeo" && <IpGeoView data={result.modules.ipGeo} error={result.errors.ipGeo} />}
       </div>
     </div>
@@ -651,6 +700,103 @@ function RobotsTxtView({ data, error }: { data: any; error?: string }) {
   );
 }
 
+function DnssecView({ data, error }: { data: any; error?: string }) {
+  if (error) return <ErrorBox error={error} />;
+  if (!data) return null;
+
+  if (!data.hasDnssec) {
+    return <Card title="DNSSEC"><span className="text-muted-foreground text-sm">NOT ENABLED</span></Card>;
+  }
+
+  return (
+    <Card title="DNSSEC">
+      <div className="space-y-2 text-sm">
+        <Row label="Validated" value={data.validated ? "YES" : "NO"} mono />
+        <Row label="Algorithm" value={data.algorithm ? String(data.algorithm) : "N/A"} mono />
+        <Row label="Key Tag" value={data.keyTag ? String(data.keyTag) : "N/A"} mono />
+        <Row label="Digest Type" value={data.digestType ? String(data.digestType) : "N/A"} mono />
+        <Row label="Digest" value={data.digest || "N/A"} mono />
+      </div>
+    </Card>
+  );
+}
+
+function EmailSecurityView({ data, error }: { data: any; error?: string }) {
+  if (error) return <ErrorBox error={error} />;
+  if (!data) return null;
+
+  return (
+    <div className="grid gap-4 md:grid-cols-3">
+      <Card title="SPF">
+        <div className="space-y-2 text-sm">
+          {data.spf ? (
+            <>
+              <Row label="Valid" value={data.spf.valid ? "YES" : "NO"} mono />
+              <Row label="All Mechanism" value={data.spf.all} mono />
+              <Row label="Record" value={data.spf.record} mono />
+            </>
+          ) : (
+            <span className="text-muted-foreground">NOT FOUND</span>
+          )}
+        </div>
+      </Card>
+
+      <Card title="DMARC">
+        <div className="space-y-2 text-sm">
+          {data.dmarc ? (
+            <>
+              <Row label="Policy" value={data.dmarc.policy} mono />
+              <Row label="PCT" value={`${data.dmarc.pct}%`} mono />
+              <Row label="Record" value={data.dmarc.record} mono />
+            </>
+          ) : (
+            <span className="text-muted-foreground">NOT FOUND</span>
+          )}
+        </div>
+      </Card>
+
+      <Card title="DKIM">
+        <div className="space-y-2 text-sm">
+          {data.dkim.selectors.length > 0 ? (
+            <>
+              <Row label="Selectors" value={data.dkim.selectors.join(", ")} mono />
+              {data.dkim.selectors.map((s: string) => (
+                <Row key={s} label={s} value={data.dkim.records[s]?.slice(0, 80)} mono />
+              ))}
+            </>
+          ) : (
+            <span className="text-muted-foreground">NO SELECTORS FOUND</span>
+          )}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function AsnLookupView({ data, error }: { data: any; error?: string }) {
+  if (error) return <ErrorBox error={error} />;
+  if (!data) return null;
+
+  if (data.asns.length === 0) {
+    return <Card title="ASN Lookup"><span className="text-muted-foreground text-sm">NO ASN DATA</span></Card>;
+  }
+
+  return (
+    <Card title={`ASN Lookup — ${data.asns.length} entries`}>
+      <div className="space-y-3 text-sm">
+        {data.asns.map((a: any, i: number) => (
+          <div key={i} className="border-t border-border pt-3 first:border-0 first:pt-0">
+            <Row label="IP" value={a.ip} mono />
+            <Row label="ASN" value={a.asn} mono />
+            <Row label="Organization" value={a.org} />
+            <Row label="ISP" value={a.isp} />
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 function IpGeoView({ data, error }: { data: any; error?: string }) {
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
@@ -676,6 +822,182 @@ function IpGeoView({ data, error }: { data: any; error?: string }) {
         </div>
       </Card>
     </div>
+  );
+}
+
+function TechFingerprintView({ data, error }: { data: any; error?: string }) {
+  if (error) return <ErrorBox error={error} />;
+  if (!data) return null;
+
+  if (data.technologies.length === 0) {
+    return <Card title="Tech Fingerprint"><span className="text-muted-foreground text-sm">NO TECHNOLOGIES DETECTED</span></Card>;
+  }
+
+  return (
+    <Card title={`Tech Fingerprint — ${data.technologies.length} detected`}>
+      <div className="space-y-3 text-sm">
+        {data.technologies.map((t: any, i: number) => (
+          <div key={i} className="border-t border-border pt-3 first:border-0 first:pt-0">
+            <Row label="Name" value={t.name} />
+            <Row label="Confidence" value={`${t.confidence}%`} mono />
+            {t.version && <Row label="Version" value={t.version} mono />}
+            <Row label="Categories" value={t.categories.join(", ")} />
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function CdnDetectionView({ data, error }: { data: any; error?: string }) {
+  if (error) return <ErrorBox error={error} />;
+  if (!data) return null;
+
+  return (
+    <Card title="CDN Detection">
+      <div className="space-y-3 text-sm">
+        <Row label="Detected" value={data.detected ? "YES" : "NO"} mono />
+        {data.provider && <Row label="Provider" value={data.provider} />}
+        {data.cname && <Row label="CNAME" value={data.cname} mono />}
+        <Row label="Evidence" value={data.evidence.length > 0 ? data.evidence.join(", ") : "NONE"} />
+        <div className="pt-2">
+          <span className="text-muted-foreground">Headers:</span>
+          <div className="space-y-1 mt-1 text-xs mono">
+            {Object.entries(data.headers).map(([k, v]) => (
+              <div key={k} className="text-muted-foreground/70">{k}: {String(v)}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function ReverseIpView({ data, error }: { data: any; error?: string }) {
+  if (error) return <ErrorBox error={error} />;
+  if (!data) return null;
+
+  return (
+    <Card title={`Reverse IP — ${data.domains.length} domains on ${data.ip}`}>
+      <div className="space-y-2 text-sm max-h-96 overflow-y-auto">
+        {data.domains.length === 0 ? (
+          <span className="text-muted-foreground">NO DOMAINS FOUND</span>
+        ) : (
+          data.domains.map((d: string, i: number) => (
+            <Row key={i} label={d} value="" mono />
+          ))
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function TracerouteView({ data, error }: { data: any; error?: string }) {
+  if (error) return <ErrorBox error={error} />;
+  if (!data) return null;
+
+  if (data.hops.length === 0) {
+    return <Card title="Traceroute"><span className="text-muted-foreground text-sm">NO HOPS</span></Card>;
+  }
+
+  return (
+    <Card title={`Traceroute — ${data.hops.length} hops`}>
+      <div className="space-y-2 text-sm font-mono">
+        {data.hops.map((h: any) => (
+          <div key={h.hop} className="flex gap-4">
+            <span className="text-muted-foreground w-8">{h.hop}</span>
+            <span className="w-32">{h.ip}</span>
+            <span className="w-24">{h.rtt.toFixed(1)} ms</span>
+            <span>{h.hostname || ""}</span>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function WaybackView({ data, error }: { data: any; error?: string }) {
+  if (error) return <ErrorBox error={error} />;
+  if (!data) return null;
+
+  return (
+    <Card title={`Wayback — ${data.total} snapshots`}>
+      <div className="space-y-2 text-sm max-h-96 overflow-y-auto">
+        {data.snapshots.length === 0 ? (
+          <span className="text-muted-foreground">NO SNAPSHOTS</span>
+        ) : (
+          data.snapshots.slice(0, 50).map((s: any, i: number) => (
+            <div key={i} className="flex gap-2">
+              <span className="text-muted-foreground mono w-28">{s.timestamp}</span>
+              <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all mono text-xs">
+                {s.url}
+              </a>
+            </div>
+          ))
+        )}
+        {data.snapshots.length > 50 && (
+          <p className="text-xs text-muted-foreground mt-2">Showing first 50 of {data.snapshots.length}</p>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function AxfrView({ data, error }: { data: any; error?: string }) {
+  if (error) return <ErrorBox error={error} />;
+  if (!data) return null;
+
+  return (
+    <Card title="AXFR Zone Transfer">
+      <div className="space-y-3 text-sm">
+        <Row label="Vulnerable" value={data.vulnerable ? "YES" : "NO"} mono />
+        {data.nameservers.map((ns: any, i: number) => (
+          <div key={i} className="border-t border-border pt-3 first:border-0 first:pt-0">
+            <Row label="Nameserver" value={ns.ns} mono />
+            <Row label="AXFR Allowed" value={ns.axfr ? "YES" : "NO"} mono />
+            {ns.axfr && ns.records && ns.records.length > 0 && (
+              <div className="mt-2 space-y-1 text-xs mono">
+                {ns.records.slice(0, 20).map((r: any, j: number) => (
+                  <div key={j} className="text-muted-foreground/70 pl-4">{r.type} {r.value}</div>
+                ))}
+                {ns.records.length > 20 && <div className="text-muted-foreground/50 pl-4">... and {ns.records.length - 20} more</div>}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function EmailHarvestView({ data, error }: { data: any; error?: string }) {
+  if (error) return <ErrorBox error={error} />;
+  if (!data) return null;
+
+  const allEmails = [...new Set(data.emails as string[])];
+
+  return (
+    <Card title={`Email Harvest — ${allEmails.length} unique emails`}>
+      <div className="space-y-3 text-sm">
+        <div>
+          <span className="text-muted-foreground">Sources:</span>
+          <div className="flex gap-4 mt-1 text-xs">
+            <span>WHOIS: {data.sources.whois.length}</span>
+            <span>TXT: {data.sources.txt.length}</span>
+            <span>Other: {data.sources.other.length}</span>
+          </div>
+        </div>
+        <div className="max-h-96 overflow-y-auto space-y-1">
+          {allEmails.length === 0 ? (
+            <span className="text-muted-foreground">NO EMAILS FOUND</span>
+          ) : (
+            allEmails.map((e: string, i: number) => (
+              <Row key={i} label={e} value="" mono />
+            ))
+          )}
+        </div>
+      </div>
+    </Card>
   );
 }
 

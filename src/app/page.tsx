@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Loader2, AlertCircle, CheckCircle, Terminal, ChevronRight, Globe, FileText, Shield, Radio, Plug, Search as SearchIcon, MapPin, GitBranch, FileKey, Bot } from "lucide-react";
+import { Search, Loader2, AlertCircle, CheckCircle, Terminal, ChevronRight, Globe, FileText, Shield, Radio, Plug, Search as SearchIcon, MapPin, GitBranch, FileKey, Bot, Key, Mail, Waypoints, Cpu, Share2, Route, Clock, Database, MailSearch, Server } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function HomePage() {
@@ -138,6 +138,16 @@ export default function HomePage() {
               { Icon: GitBranch, label: "CT Logs" },
               { Icon: FileKey, label: "security.txt" },
               { Icon: Bot, label: "robots.txt" },
+              { Icon: Key, label: "DNSSEC" },
+              { Icon: Mail, label: "Email Security" },
+              { Icon: Waypoints, label: "ASN Lookup" },
+              { Icon: Cpu, label: "Tech Fingerprint" },
+              { Icon: Server, label: "CDN Detection" },
+              { Icon: Share2, label: "Reverse IP" },
+              { Icon: Route, label: "Traceroute" },
+              { Icon: Clock, label: "Wayback" },
+              { Icon: Database, label: "AXFR" },
+              { Icon: MailSearch, label: "Email Harvest" },
             ].map((m, i) => (
               <div key={i} className="flex items-center gap-2 text-muted-foreground/80 hover:text-foreground transition-colors">
                 <m.Icon className="h-4 w-4 text-primary flex-shrink-0" />

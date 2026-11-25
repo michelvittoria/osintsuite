@@ -133,7 +133,8 @@ export interface CdnDetectionResult {
   detected: boolean;
   provider?: string;
   evidence: string[];
-  cnames: string[];
+  headers: Record<string, string>;
+  cname?: string;
 }
 
 export interface WaybackResult {
