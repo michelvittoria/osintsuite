@@ -1,21 +1,22 @@
 import { getRedis, KEYS, TTL } from "@/lib/redis";
-import type { JobState, ScanResult, ModuleStatus } from "@/lib/types";
-import { runScan, ModuleName, MODULES } from "@/scanners";
+import type { JobState, ScanResult, ModuleStatus, TargetType } from "@/lib/types";
+import { runScan, ModuleName, MODULES, IP_MODULES } from "@/scanners";
 
 const JOB_TIMEOUT = 60000; // 60s max per job
 
-export async function createJob(domain: string): Promise<string> {
+export async function createJob(value: string, targetType: TargetType): Promise<string> {
   const redis = getRedis();
   const jobId = crypto.randomUUID();
   const now = Date.now();
 
+  const modules = targetType === "ip" ? IP_MODULES : MODULES;
+
   const job: JobState = {
     jobId,
-    domain,
+    domain: value,
+    targetType,
     status: "pending",
-    modules: Object.fromEntries(
-      ["dns", "whois", "ssl", "http", "ports", "subdomains"].map((m) => [m, "pending"])
-    ),
+    modules: Object.fromEntries(modules.map((m) => [m, "pending"])),
     createdAt: now,
     updatedAt: now,
   };
@@ -48,7 +49,8 @@ export async function setJobResult(jobId: string, result: ScanResult): Promise<v
   // Derive final module statuses from the result so the UI never shows a
   // module stuck at "running" after the job completes.
   const modules: Record<string, ModuleStatus> = {};
-  for (const name of MODULES) {
+  const activeModules = result.targetType === "ip" ? IP_MODULES : MODULES;
+  for (const name of activeModules) {
     modules[name] = result.errors[name] ? "error" : "done";
   }
   await updateJob(jobId, { status: "done", result, modules });
@@ -58,15 +60,15 @@ export async function setJobError(jobId: string, error: string): Promise<void> {
   await updateJob(jobId, { status: "error", error });
 }
 
-export async function getCachedResult(domain: string): Promise<ScanResult | null> {
+export async function getCachedResult(targetType: TargetType, value: string): Promise<ScanResult | null> {
   const redis = getRedis();
-  const data = await redis.get(KEYS.cache(domain));
+  const data = await redis.get(KEYS.cache(targetType, value));
   return data ? JSON.parse(data) : null;
 }
 
-export async function setCachedResult(domain: string, result: ScanResult): Promise<void> {
+export async function setCachedResult(targetType: TargetType, value: string, result: ScanResult): Promise<void> {
   const redis = getRedis();
-  await redis.setex(KEYS.cache(domain), TTL.cache, JSON.stringify({ ...result, cached: true }));
+  await redis.setex(KEYS.cache(targetType, value), TTL.cache, JSON.stringify({ ...result, cached: true }));
 }
 
 export async function processJob(jobId: string): Promise<void> {
@@ -81,7 +83,7 @@ export async function processJob(jobId: string): Promise<void> {
 
   try {
     const result = await Promise.race([
-      runScan(job.domain, async (module, status) => {
+      runScan(job.domain, job.targetType, async (module, status) => {
         await updateJob(jobId, {
           modules: { [module]: status },
         });
@@ -90,7 +92,7 @@ export async function processJob(jobId: string): Promise<void> {
     ]);
 
     await setJobResult(jobId, result);
-    await setCachedResult(job.domain, result);
+    await setCachedResult(job.targetType, job.domain, result);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
     await setJobError(jobId, msg);

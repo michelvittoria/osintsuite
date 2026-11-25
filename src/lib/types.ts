@@ -60,8 +60,23 @@ export interface SubdomainResult {
   ips: string[];
 }
 
+export interface IpGeoResult {
+  query: string;
+  country?: string;
+  countryCode?: string;
+  regionName?: string;
+  city?: string;
+  isp?: string;
+  org?: string;
+  asn?: string;
+  timezone?: string;
+}
+
+export type TargetType = "domain" | "ip";
+
 export interface ScanResult {
   domain: string;
+  targetType: TargetType;
   scannedAt: string;
   cached: boolean;
   modules: {
@@ -71,6 +86,7 @@ export interface ScanResult {
     http: HttpResult | null;
     ports: PortResult[] | null;
     subdomains: SubdomainResult[] | null;
+    ipGeo?: IpGeoResult | null;
   };
   errors: Record<string, string>;
 }
@@ -78,6 +94,7 @@ export interface ScanResult {
 export interface JobState {
   jobId: string;
   domain: string;
+  targetType: TargetType;
   status: ScanStatus;
   modules: Record<string, ModuleStatus>;
   result?: ScanResult;

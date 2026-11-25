@@ -15,6 +15,7 @@ export async function GET(
   return NextResponse.json({
     jobId: job.jobId,
     domain: job.domain,
+    targetType: job.targetType,
     status: job.status,
     modules: job.modules,
     result: job.result || null,

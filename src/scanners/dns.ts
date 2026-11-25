@@ -62,3 +62,20 @@ export async function scanDns(domain: string): Promise<DnsResult> {
     soa: soaData,
   };
 }
+
+export async function resolvePTR(ip: string): Promise<DnsResult> {
+  const records: DnsRecord[] = [];
+
+  const ptr = await Promise.allSettled([withTimeout(dns.reverse(ip), TIMEOUT)]);
+
+  if (ptr[0].status === "fulfilled") {
+    ptr[0].value.forEach((host) => records.push({ type: "PTR", value: host }));
+  }
+
+  return {
+    records,
+    nameservers: [],
+    mx: [],
+    txt: [],
+  };
+}

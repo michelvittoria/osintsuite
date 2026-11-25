@@ -19,7 +19,7 @@ export function getRedis(): Redis {
 
 export const KEYS = {
   job: (id: string) => `job:${id}`,
-  cache: (domain: string) => `cache:${domain}`,
+  cache: (targetType: string, value: string) => `cache:${targetType}:${value}`,
   rateLimit: (ip: string) => `ratelimit:${ip}`,
   dailyLimit: (ip: string) => `daily:${ip}`,
 };

@@ -16,6 +16,7 @@ import {
   Search,
   FileText,
   Terminal,
+  MapPin,
 } from "lucide-react";
 import type { JobState, ScanResult } from "@/lib/types";
 
@@ -26,6 +27,7 @@ const MODULE_LABELS: Record<string, string> = {
   http: "HTTP",
   ports: "PORTS",
   subdomains: "SUBDOMAINS",
+  ipGeo: "IP GEO",
 };
 
 const MODULE_ICONS: Record<string, React.ReactNode> = {
@@ -35,6 +37,7 @@ const MODULE_ICONS: Record<string, React.ReactNode> = {
   http: <Server className="h-3.5 w-3.5" />,
   ports: <Network className="h-3.5 w-3.5" />,
   subdomains: <Search className="h-3.5 w-3.5" />,
+  ipGeo: <MapPin className="h-3.5 w-3.5" />,
 };
 
 export default function ScanPage() {
@@ -86,7 +89,7 @@ export default function ScanPage() {
     return (
       <main className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center panel p-8 max-w-md">
-          <XCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+          <XCircle className="h-12 w-12 text-primary mx-auto mb-4" />
           <h1 className="text-xl font-bold mb-2">SCAN ERROR</h1>
           <p className="text-muted-foreground mb-6 mono text-sm">{error}</p>
           <button
@@ -192,7 +195,7 @@ export default function ScanPage() {
             {status === "done" ? (
               <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
             ) : status === "error" ? (
-              <XCircle className="h-3.5 w-3.5 flex-shrink-0" />
+              <XCircle className="h-3.5 w-3.5 flex-shrink-0 text-primary" />
             ) : status === "running" ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin flex-shrink-0" />
             ) : (
@@ -232,7 +235,9 @@ function ResultView({
     { id: "ssl", label: "SSL", data: result.modules.ssl },
     { id: "http", label: "HTTP", data: result.modules.http },
     { id: "ports", label: "PORTS", data: result.modules.ports },
-    { id: "subdomains", label: "SUBDOMAINS", data: result.modules.subdomains },
+    ...(result.targetType === "ip"
+      ? [{ id: "ipGeo", label: "IP GEO", data: result.modules.ipGeo }]
+      : [{ id: "subdomains", label: "SUBDOMAINS", data: result.modules.subdomains }]),
   ];
 
   return (
@@ -251,7 +256,7 @@ function ResultView({
             {MODULE_ICONS[tab.id]}
             {tab.label}
             {result.errors[tab.id] && (
-              <XCircle className="h-3 w-3 text-destructive" />
+              <XCircle className="h-3 w-3 text-primary" />
             )}
           </button>
         ))}
@@ -264,6 +269,7 @@ function ResultView({
         {activeTab === "http" && <HttpView data={result.modules.http} error={result.errors.http} />}
         {activeTab === "ports" && <PortsView data={result.modules.ports} error={result.errors.ports} />}
         {activeTab === "subdomains" && <SubdomainsView data={result.modules.subdomains} error={result.errors.subdomains} />}
+        {activeTab === "ipGeo" && <IpGeoView data={result.modules.ipGeo} error={result.errors.ipGeo} />}
       </div>
     </div>
   );
@@ -515,6 +521,34 @@ function SubdomainsView({ data, error }: { data: any; error?: string }) {
         ))}
       </div>
     </Card>
+  );
+}
+
+function IpGeoView({ data, error }: { data: any; error?: string }) {
+  if (error) return <ErrorBox error={error} />;
+  if (!data) return null;
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <Card title="Location">
+        <div className="space-y-2 text-sm">
+          <Row label="IP" value={data.query} mono />
+          <Row label="Country" value={data.country} />
+          <Row label="Country Code" value={data.countryCode} mono />
+          <Row label="Region" value={data.regionName} />
+          <Row label="City" value={data.city} />
+          <Row label="Timezone" value={data.timezone} mono />
+        </div>
+      </Card>
+
+      <Card title="Network">
+        <div className="space-y-2 text-sm">
+          <Row label="ISP" value={data.isp} />
+          <Row label="Organization" value={data.org} />
+          <Row label="ASN" value={data.asn} mono />
+        </div>
+      </Card>
+    </div>
   );
 }
 

@@ -1,27 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Loader2, AlertCircle, CheckCircle, Terminal, ChevronRight } from "lucide-react";
+import { Search, Loader2, AlertCircle, CheckCircle, Terminal, ChevronRight, Globe, FileText, Shield, Radio, Plug, Search as SearchIcon, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function HomePage() {
-  const [domain, setDomain] = useState("");
+  const [target, setTarget] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const validateDomain = (d: string): boolean => {
-    const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i;
-    return domainRegex.test(d);
-  };
+  const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(target.trim());
+  const isDomain = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i.test(target.trim());
+  const isValid = isIp || isDomain;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    const trimmed = domain.trim().toLowerCase();
-    if (!validateDomain(trimmed)) {
-      setError("INVALID DOMAIN FORMAT");
+    const trimmed = target.trim().toLowerCase();
+    if (!isValid) {
+      setError("INVALID TARGET — ENTER A DOMAIN OR IPv4 ADDRESS");
       return;
     }
 
@@ -30,7 +29,7 @@ export default function HomePage() {
       const res = await fetch("/api/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain: trimmed }),
+        body: JSON.stringify({ target: trimmed }),
       });
 
       const data = await res.json();
@@ -70,23 +69,31 @@ export default function HomePage() {
         {/* Search Form */}
         <form onSubmit={handleSubmit} className="panel p-6 space-y-4">
           <div className="relative">
-            <label htmlFor="domain" className="label block mb-2">
-              TARGET DOMAIN
+            <label htmlFor="target" className="label block mb-2">
+              TARGET — DOMAIN OR IP
             </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
               <input
-                id="domain"
+                id="target"
                 type="text"
-                value={domain}
-                onChange={(e) => setDomain(e.target.value)}
-                placeholder="example.com"
+                value={target}
+                onChange={(e) => setTarget(e.target.value)}
+                placeholder="example.com or 8.8.8.8"
                 className="w-full pl-10 pr-4 py-3 border border-input bg-background/50 rounded text-lg placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all disabled:opacity-50 mono"
                 disabled={loading}
                 autoFocus
                 spellCheck={false}
               />
             </div>
+            {target.trim() && (
+              <p className="mt-2 text-xs mono text-muted-foreground">
+                DETECTED:{" "}
+                <span className="text-primary">
+                  {isIp ? "IPv4 ADDRESS" : isDomain ? "DOMAIN" : "UNKNOWN"}
+                </span>
+              </p>
+            )}
           </div>
 
           {error && (
@@ -98,7 +105,7 @@ export default function HomePage() {
 
           <button
             type="submit"
-            disabled={loading || !domain.trim()}
+            disabled={loading || !target.trim()}
             className="w-full py-3.5 bg-primary text-primary-foreground rounded font-medium text-lg transition-all hover:shadow-[0_0_24px_hsl(var(--signal)/0.4)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:scale-100 flex items-center justify-center gap-2"
           >
             {loading ? (
@@ -121,15 +128,16 @@ export default function HomePage() {
           <p className="label mb-3">MODULES</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
             {[
-              { icon: "🌐", label: "DNS Records" },
-              { icon: "📄", label: "WHOIS" },
-              { icon: "🔒", label: "SSL/TLS" },
-              { icon: "📡", label: "HTTP Headers" },
-              { icon: "🔌", label: "Port Scan" },
-              { icon: "🔍", label: "Subdomains" },
+              { Icon: Globe, label: "DNS Records" },
+              { Icon: FileText, label: "WHOIS" },
+              { Icon: Shield, label: "SSL/TLS" },
+              { Icon: Radio, label: "HTTP Headers" },
+              { Icon: Plug, label: "Port Scan" },
+              { Icon: SearchIcon, label: "Subdomains" },
+              { Icon: MapPin, label: "IP Geo" },
             ].map((m, i) => (
               <div key={i} className="flex items-center gap-2 text-muted-foreground/80 hover:text-foreground transition-colors">
-                <span className="text-base">{m.icon}</span>
+                <m.Icon className="h-4 w-4 text-primary flex-shrink-0" />
                 <span className="mono">{m.label}</span>
               </div>
             ))}
