@@ -9,3 +9,4 @@ build/
 coverage/
 *.log
 npm-debug.log**.tsbuildinfo
+tsconfig.tsbuildinfo
