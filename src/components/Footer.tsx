@@ -18,13 +18,13 @@ export default function Footer() {
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               {t("footer.project")}
             </p>
-            <div className="flex items-center gap-2 text-sm">
-              <Github className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground/70 mono">
+              <Github className="h-3 w-3 flex-shrink-0" />
               <a
                 href={GITHUB_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary transition-colors"
+                className="hover:text-muted-foreground transition-colors"
               >
                 {t("footer.github")}
               </a>
