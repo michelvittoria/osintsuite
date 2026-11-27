@@ -47,9 +47,8 @@ export function I18nProvider({ children, initialLocale = "en" }: { children: Rea
     return () => { mounted = false; };
   }, [locale]);
 
-  if (!dict) {
-    return null;
-  }
+  // Use fallback dict during load to avoid hydration mismatch
+  const safeDict = dict || {};
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
@@ -59,7 +58,7 @@ export function I18nProvider({ children, initialLocale = "en" }: { children: Rea
   };
 
   const t = (key: string, params?: Record<string, string | number>) => {
-    const str = dict[key] || key;
+    const str = safeDict[key] || key;
     return params ? interpolate(str, params) : str;
   };
 
