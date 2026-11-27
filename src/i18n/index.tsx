@@ -2,23 +2,20 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import type { Locale } from "./locale";
+import enDict from "./dicts/en.json";
+import ptDict from "./dicts/pt.json";
 
 type Dict = Record<string, string>;
 
-const dicts: Record<Locale, () => Promise<Dict>> = {
-  en: () => import("./dicts/en.json").then((m) => m.default),
-  pt: () => import("./dicts/pt.json").then((m) => m.default),
+const dicts: Record<Locale, Dict> = {
+  en: enDict as Dict,
+  pt: ptDict as Dict,
 };
 
-let cachedDict: Dict | null = null;
 let currentLocale: Locale = "en";
 
 export async function getDict(locale: Locale): Promise<Dict> {
-  if (cachedDict && currentLocale === locale) return cachedDict;
-  const dict = await dicts[locale]();
-  cachedDict = dict;
-  currentLocale = locale;
-  return dict;
+  return dicts[locale];
 }
 
 function interpolate(str: string, params: Record<string, string | number>): string {
@@ -35,30 +32,21 @@ const I18nContext = createContext<I18nContextType | null>(null);
 
 export function I18nProvider({ children, initialLocale = "en" }: { children: ReactNode; initialLocale?: Locale }) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
-  const [dict, setDict] = useState<Dict | null>(null);
+  const [dict, setDict] = useState<Dict>(dicts[initialLocale]);
 
   useEffect(() => {
-    let mounted = true;
-    getDict(locale).then((d) => {
-      if (mounted) {
-        setDict(d);
-      }
-    });
-    return () => { mounted = false; };
+    setDict(dicts[locale]);
+    if (typeof document !== "undefined") {
+      document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000; SameSite=Lax`;
+    }
   }, [locale]);
-
-  // Use fallback dict during load to avoid hydration mismatch
-  const safeDict = dict || {};
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
-    if (typeof document !== "undefined") {
-      document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
-    }
   };
 
   const t = (key: string, params?: Record<string, string | number>) => {
-    const str = safeDict[key] || key;
+    const str = dict[key] || key;
     return params ? interpolate(str, params) : str;
   };
 

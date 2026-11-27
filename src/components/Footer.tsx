@@ -29,6 +29,12 @@ export default function Footer() {
                 {t("footer.github")}
               </a>
             </div>
+            <a
+              href="/about"
+              className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              {t("footer.about")}
+            </a>
             <p className="text-xs text-muted-foreground/60 mono">
               {t("footer.opensource")}
             </p>
@@ -53,6 +59,20 @@ export default function Footer() {
                 {t("footer.static")}
               </li>
             </ul>
+            <div className="flex flex-col gap-1.5 pt-1 text-xs text-muted-foreground/60">
+              <a
+                href="/privacy"
+                className="hover:text-muted-foreground transition-colors"
+              >
+                {t("footer.privacy")}
+              </a>
+              <a
+                href="/terms"
+                className="hover:text-muted-foreground transition-colors"
+              >
+                {t("footer.terms")}
+              </a>
+            </div>
           </div>
 
           {/* Support */}
@@ -64,26 +84,11 @@ export default function Footer() {
               href={BMC_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-[#FFDD00] text-[#0D0C22] text-sm font-semibold hover:bg-[#FFE94D] transition-colors"
             >
               <Coffee className="h-4 w-4" />
               {t("footer.buycoffee")}
             </a>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground/60">
-              <a
-                href="/privacy"
-                className="hover:text-muted-foreground transition-colors"
-              >
-                {t("footer.privacy")}
-              </a>
-              <span className="text-border/50">·</span>
-              <a
-                href="/terms"
-                className="hover:text-muted-foreground transition-colors"
-              >
-                {t("footer.terms")}
-              </a>
-            </div>
           </div>
         </div>
 

@@ -106,12 +106,13 @@ export default function HomePage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative">
-      <div className="absolute inset-0 opacity-5 pointer-events-none animate-sweep">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
-      </div>
+    <div className="min-h-screen flex flex-col">
+      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative">
+        <div className="absolute inset-0 opacity-5 pointer-events-none animate-sweep">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
+        </div>
 
-      <div className="relative w-full max-w-xl sm:max-w-2xl lg:max-w-3xl">
+        <div className="relative w-full max-w-xl sm:max-w-2xl lg:max-w-3xl">
         {/* Header */}
         <div className="mb-8 sm:mb-12">
           <div className="flex items-center justify-between gap-3 mb-4">
@@ -137,11 +138,12 @@ export default function HomePage() {
                 href={BMC_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-1.5 rounded text-muted-foreground hover:text-primary transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#FFDD00] text-[#0D0C22] text-xs font-semibold hover:bg-[#FFE94D] transition-colors"
                 aria-label={t("nav.support")}
                 title={t("nav.support")}
               >
-                <Coffee className="h-4 w-4" />
+                <Coffee className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{t("nav.support")}</span>
               </a>
               <span className="hidden sm:inline text-xs mono text-muted-foreground">{t("header.langLabel")}</span>
               <LanguageToggle />
@@ -229,10 +231,11 @@ export default function HomePage() {
         <p className="mt-4 sm:mt-6 text-center text-xs text-muted-foreground/60 mono">
           {t("home.footer")}
         </p>
-      </div>
+        </div>
+      </main>
 
       <Footer />
-    </main>
+    </div>
   );
 }
 
