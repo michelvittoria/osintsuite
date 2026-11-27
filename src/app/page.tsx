@@ -28,9 +28,15 @@ import {
   Database,
   MailSearch,
   Server,
+  Github,
+  Coffee,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/i18n";
+import Footer from "@/components/Footer";
+
+const GITHUB_URL = "https://github.com/michelvittoria";
+const BMC_URL = "https://www.buymeacoffee.com/michelmastn";
 
 const MODULES = [
   { key: "dns", Icon: Globe, labelKey: "module.dns", descKey: "moduleDesc.dns" },
@@ -117,6 +123,26 @@ export default function HomePage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1.5 rounded text-muted-foreground hover:text-primary transition-colors"
+                aria-label="GitHub"
+                title={t("nav.github")}
+              >
+                <Github className="h-4 w-4" />
+              </a>
+              <a
+                href={BMC_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1.5 rounded text-muted-foreground hover:text-primary transition-colors"
+                aria-label={t("nav.support")}
+                title={t("nav.support")}
+              >
+                <Coffee className="h-4 w-4" />
+              </a>
               <span className="hidden sm:inline text-xs mono text-muted-foreground">{t("header.langLabel")}</span>
               <LanguageToggle />
             </div>
@@ -204,6 +230,8 @@ export default function HomePage() {
           {t("home.footer")}
         </p>
       </div>
+
+      <Footer />
     </main>
   );
 }

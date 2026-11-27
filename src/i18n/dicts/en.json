@@ -1,11 +1,9 @@
 {
   "meta.title": "OSINT Suite — Free Domain & IP Reconnaissance Tool",
   "meta.description": "Free OSINT reconnaissance tool with 20 modules: DNS, WHOIS, SSL/TLS, HTTP headers, port scan, subdomain enumeration, CT logs, DNSSEC, email security, ASN lookup, tech fingerprint, CDN detection, reverse IP, traceroute, Wayback and more. Analyze any domain or IPv4 address instantly.",
-
   "header.title": "OSINT SUITE",
   "header.subtitle": "DOMAIN RECONNAISSANCE TERMINAL",
   "header.langLabel": "Language",
-
   "home.targetLabel": "TARGET — DOMAIN OR IP",
   "home.placeholder": "example.com or 8.8.8.8",
   "home.detected": "DETECTED:",
@@ -16,14 +14,12 @@
   "home.initializing": "INITIALIZING SCAN...",
   "home.modules": "MODULES",
   "home.footer": "RESULTS CACHED 24H • NO DATA STORED • STATIC ANALYSIS ONLY",
-
   "error.invalidTarget": "INVALID TARGET — ENTER A DOMAIN OR IPv4 ADDRESS",
   "error.scanInit": "SCAN INIT FAILED",
   "error.network": "NETWORK ERROR",
   "error.notFound": "SCAN NOT FOUND OR EXPIRED",
   "error.connection": "CONNECTION ERROR",
   "error.scanFailed": "SCAN FAILED",
-
   "scan.target": "TARGET",
   "scan.complete": "SCAN COMPLETE",
   "scan.scanning": "SCANNING",
@@ -33,7 +29,6 @@
   "scan.connecting": "CONNECTING...",
   "scan.errorTitle": "SCAN ERROR",
   "scan.showingFirst": "Showing first {n} of {total}",
-
   "module.dns": "DNS Records",
   "module.whois": "WHOIS",
   "module.ssl": "SSL/TLS",
@@ -54,7 +49,6 @@
   "module.wayback": "Wayback",
   "module.axfr": "AXFR",
   "module.emailHarvest": "Email Harvest",
-
   "moduleDesc.dns": "A, AAAA, MX, NS, CNAME, TXT and SOA records",
   "moduleDesc.whois": "Domain registration, registrar and ownership info",
   "moduleDesc.ssl": "Certificate chain, issuer, expiry and SANs",
@@ -75,7 +69,6 @@
   "moduleDesc.wayback": "Archived snapshots from archive.org",
   "moduleDesc.axfr": "Attempts DNS zone transfer on each nameserver",
   "moduleDesc.emailHarvest": "Extracts emails from WHOIS, DNS and HTTP",
-
   "label.dns": "DNS",
   "label.whois": "WHOIS",
   "label.ssl": "SSL/TLS",
@@ -96,10 +89,8 @@
   "label.wayback": "WAYBACK",
   "label.axfr": "AXFR",
   "label.emailHarvest": "EMAIL HARVEST",
-
   "export.json": "JSON",
   "export.csv": "CSV",
-
   "view.noRecords": "NO RECORDS",
   "view.none": "NONE",
   "view.notFound": "NOT FOUND",
@@ -116,7 +107,6 @@
   "view.noSelectors": "NO SELECTORS FOUND",
   "view.yes": "YES",
   "view.no": "NO",
-
   "view.aRecords": "A / AAAA / CNAME",
   "view.nameservers": "Nameservers",
   "view.mxRecords": "MX Records",
@@ -167,7 +157,6 @@
   "view.sources": "Sources",
   "view.other": "Other",
   "view.andMore": "... and {n} more",
-
   "field.registrar": "Registrar",
   "field.registrant": "Registrant",
   "field.created": "Created",
@@ -208,12 +197,10 @@
   "field.nameserver": "Nameserver",
   "field.hostmaster": "Hostmaster",
   "field.ns": "NS",
-
   "view.soa": "SOA",
   "view.spf": "SPF",
   "view.dmarc": "DMARC",
   "view.dkim": "DKIM",
-
   "tab.dns": "DNS",
   "tab.whois": "WHOIS",
   "tab.ssl": "SSL",
@@ -233,5 +220,46 @@
   "tab.traceroute": "TRACEROUTE",
   "tab.wayback": "WAYBACK",
   "tab.axfr": "AXFR",
-  "tab.emailHarvest": "EMAIL HARVEST"
+  "tab.emailHarvest": "EMAIL HARVEST",
+  "nav.github": "GitHub",
+  "nav.support": "Support",
+  "footer.project": "Project",
+  "footer.github": "Source code",
+  "footer.opensource": "Open source · MIT License",
+  "footer.trust": "Privacy",
+  "footer.cached": "Results cached 24h",
+  "footer.notstored": "No data stored",
+  "footer.static": "Static analysis only",
+  "footer.support": "Support",
+  "footer.buycoffee": "Buy me a coffee",
+  "footer.privacy": "Privacy",
+  "footer.terms": "Terms",
+  "footer.license": "MIT License",
+  "legal.back": "Back to scanner",
+  "privacy.title": "Privacy Policy",
+  "privacy.updated": "Last updated: November 2026",
+  "privacy.introTitle": "Overview",
+  "privacy.intro": "OSINT Suite is a free, open-source reconnaissance tool. It is designed to collect as little data as possible: no accounts, no tracking, no personal data.",
+  "privacy.dataTitle": "Data we do not collect",
+  "privacy.data": "We do not store the domains or IP addresses you scan. Scan results are cached in memory (Redis) for up to 24 hours to speed up repeated queries, then discarded. No scan history is kept and no target is written to logs.",
+  "privacy.ipTitle": "IP address usage",
+  "privacy.ip": "Your IP address is used only in memory to enforce rate limits (5 scans per minute, 50 per day). It is never logged, stored, or shared.",
+  "privacy.cookiesTitle": "Cookies",
+  "privacy.cookies": "The only cookie we set is NEXT_LOCALE, which remembers your language preference (English or Portuguese). There are no advertising, analytics, or third-party tracking cookies.",
+  "privacy.thirdPartyTitle": "Third-party services",
+  "privacy.thirdParty": "Scans query public data sources (DNS resolvers, WHOIS registries, certificate transparency logs, and similar public APIs). These queries contain only the target you submitted, never your identity. We do not use third-party analytics.",
+  "privacy.contactTitle": "Contact",
+  "privacy.contact": "Questions about privacy? Open an issue on the GitHub repository.",
+  "terms.title": "Terms of Service",
+  "terms.updated": "Last updated: November 2026",
+  "terms.acceptTitle": "Acceptance",
+  "terms.accept": "By using OSINT Suite you agree to these terms. If you do not agree, do not use the service.",
+  "terms.licenseTitle": "License",
+  "terms.license": "The source code is released under the MIT License. You may use, modify, and distribute it freely under the terms of that license.",
+  "terms.usageTitle": "Permitted use",
+  "terms.usage": "Use this tool only for authorized reconnaissance: domains and IP addresses you own, or for which you have explicit permission. Scanning third parties without authorization may violate laws in your jurisdiction.",
+  "terms.disclaimerTitle": "No warranty",
+  "terms.disclaimer": "The service is provided \"as is\", without warranty of any kind. Results come from public sources and may be incomplete, outdated, or inaccurate. Do not rely on them for security-critical decisions.",
+  "terms.responsibilityTitle": "Limitation of liability",
+  "terms.responsibility": "The authors are not liable for any damages or legal consequences arising from misuse of this tool. You are solely responsible for how you use it."
 }

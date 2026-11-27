@@ -35,19 +35,21 @@ const I18nContext = createContext<I18nContextType | null>(null);
 
 export function I18nProvider({ children, initialLocale = "en" }: { children: ReactNode; initialLocale?: Locale }) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
-  const [dict, setDict] = useState<Dict>({});
-  const [ready, setReady] = useState(false);
+  const [dict, setDict] = useState<Dict | null>(null);
 
   useEffect(() => {
     let mounted = true;
     getDict(locale).then((d) => {
       if (mounted) {
         setDict(d);
-        setReady(true);
       }
     });
     return () => { mounted = false; };
   }, [locale]);
+
+  if (!dict) {
+    return null;
+  }
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
@@ -60,10 +62,6 @@ export function I18nProvider({ children, initialLocale = "en" }: { children: Rea
     const str = dict[key] || key;
     return params ? interpolate(str, params) : str;
   };
-
-  if (!ready) {
-    return <>{children}</>;
-  }
 
   return (
     <I18nContext.Provider value={{ locale, t, setLocale }}>
