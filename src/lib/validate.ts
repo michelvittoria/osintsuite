@@ -119,6 +119,8 @@ export async function resolveAndGuard(domain: string): Promise<{ safe: boolean; 
 
     return { safe: true, ips: allIps };
   } catch (e) {
-    return { safe: false, ips: [], error: `DNS resolution failed: ${e}` };
+    // Log detail server-side only; never leak internal error text to the client.
+    console.error("[validate] DNS resolution failed:", e instanceof Error ? e.message : e);
+    return { safe: false, ips: [], error: "DNS resolution failed" };
   }
 }

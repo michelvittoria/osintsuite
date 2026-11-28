@@ -27,13 +27,19 @@ export function middleware(req: NextRequest) {
   res.headers.set("Cross-Origin-Opener-Policy", "same-origin");
   res.headers.set("Cross-Origin-Resource-Policy", "same-origin");
 
-  // CSP — restrictive but allows inline styles/scripts needed by Next.js
+  // CSP — strict in production, permissive only during development.
+  const isDev = process.env.NODE_ENV !== "production";
+  const scriptSrc = isDev
+    ? "'self' 'unsafe-inline' 'unsafe-eval'"
+    : "'self' 'strict-dynamic'";
+  const styleSrc = isDev ? "'self' 'unsafe-inline'" : "'self'";
+
   res.headers.set(
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Next.js needs unsafe-eval for dev
-      "style-src 'self' 'unsafe-inline'",
+      `script-src ${scriptSrc}`,
+      `style-src ${styleSrc}`,
       "img-src 'self' data:",
       "font-src 'self'",
       "connect-src 'self'",

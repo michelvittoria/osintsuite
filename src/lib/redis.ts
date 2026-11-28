@@ -5,6 +5,19 @@ let client: Redis | null = null;
 export function getRedis(): Redis {
   if (!client) {
     const url = process.env.REDIS_URL || "redis://localhost:6379";
+
+    // Production guard: refuse plaintext Redis without auth.
+    if (process.env.NODE_ENV === "production") {
+      const isTls = url.startsWith("rediss://");
+      const hasAuth = /rediss?:\/\/[^@/]+@/.test(url);
+      if (!isTls || !hasAuth) {
+        console.warn(
+          "[redis] WARNING: production Redis should use TLS (rediss://) with auth. " +
+            "Set REDIS_URL=rediss://:PASSWORD@host:6380"
+        );
+      }
+    }
+
     client = new Redis(url, {
       maxRetriesPerRequest: 3,
       lazyConnect: false,
