@@ -107,11 +107,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative">
-        <div className="absolute inset-0 opacity-5 pointer-events-none animate-sweep">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
-        </div>
-
+      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
         <div className="relative w-full max-w-xl sm:max-w-2xl lg:max-w-3xl">
         {/* Header */}
         <div className="mb-8 sm:mb-12">
@@ -139,11 +135,11 @@ export default function HomePage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#FFDD00] text-[#0D0C22] text-xs font-semibold hover:bg-[#FFE94D] transition-colors"
-                aria-label={t("nav.support")}
-                title={t("nav.support")}
+                aria-label={t("footer.donation")}
+                title={t("footer.donation")}
               >
                 <Coffee className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{t("nav.support")}</span>
+                <span className="hidden sm:inline">{t("footer.donation")}</span>
               </a>
               <span className="hidden sm:inline text-xs mono text-muted-foreground">{t("header.langLabel")}</span>
               <LanguageToggle />
